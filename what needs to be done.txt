@@ -1,6 +1,5 @@
 Re-code:
 - com.mojang.minecraft.gui.*
-- com.mojang.minecraft.item.PrimedTnt
 - com.mojang.minecraft.level.generator.LevelGenerator
 - com.mojang.minecraft.level.tile.*
 - com.mojang.minecraft.level.BlockMap
