@@ -5,7 +5,7 @@ import com.mojang.minecraft.Minecraft;
 import javax.swing.*;
 import java.awt.*;
 
-public final class SPFrame extends JFrame
+public final class SPFrame extends JFrame implements Runnable
 {
 	public SPFrame()
 	{
@@ -15,8 +15,21 @@ public final class SPFrame extends JFrame
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
 
+	@Override
+	public void run()
+	{
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
+		minecraftThread = new Thread(minecraft);
+		minecraftThread.start();
+	}
+
 	private Minecraft minecraft;
-	private Thread mmThread;
+	private Thread minecraftThread;
 
 	public void startMinecraft() throws Exception
 	{
@@ -43,7 +56,7 @@ public final class SPFrame extends JFrame
 
 		add(canvas);
 
-		new Thread(minecraft).start();
+		new Thread(this).start();
 	}
 
 	public void finish()

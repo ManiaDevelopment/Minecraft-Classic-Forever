@@ -29,5 +29,4 @@ Re-code:
 - com.mojang.minecraft.sound.*
 - com.mojang.minecraft.Entity
 - com.mojang.minecraft.GameSettings
-- com.mojang.minecraft.Minecraft$OS
 - com.mojang.minecraft.ProgressBarDisplay
