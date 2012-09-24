@@ -1,7 +1,5 @@
 package com.mojang.minecraft;
 
-import com.mojang.minecraft.KeyBinding;
-import com.mojang.minecraft.Minecraft;
 import com.mojang.minecraft.render.TextureManager;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
@@ -14,195 +12,251 @@ import java.util.Iterator;
 import javax.imageio.ImageIO;
 import org.lwjgl.input.Keyboard;
 
-public final class GameSettings {
+public final class GameSettings
+{
+	public GameSettings(Minecraft minecraft, File minecraftFolder)
+	{
+		bindings = new KeyBinding[] {forwardKey, leftKey, backKey, rightKey, jumpKey, buildKey, chatKey, toggleFogKey, saveLocationKey, loadLocationKey};
 
-   private static final String[] renderDistances = new String[]{"FAR", "NORMAL", "SHORT", "TINY"};
-   public boolean music = true;
-   public boolean sound = true;
-   public boolean invertMouse = false;
-   public boolean showFrameRate = false;
-   public int viewDistance = 0;
-   public boolean viewBobbing = true;
-   public boolean anaglyph = false;
-   public boolean limitFramerate = false;
-   public KeyBinding forwardKey = new KeyBinding("Forward", 17);
-   public KeyBinding leftKey = new KeyBinding("Left", 30);
-   public KeyBinding backKey = new KeyBinding("Back", 31);
-   public KeyBinding rightKey = new KeyBinding("Right", 32);
-   public KeyBinding jumpKey = new KeyBinding("Jump", 57);
-   public KeyBinding buildKey = new KeyBinding("Build", 48);
-   public KeyBinding chatKey = new KeyBinding("Chat", 20);
-   public KeyBinding toggleFogKey = new KeyBinding("Toggle fog", 33);
-   public KeyBinding saveLocationKey = new KeyBinding("Save location", 28);
-   public KeyBinding loadLocationKey = new KeyBinding("Load location", 19);
-   public KeyBinding[] bindings;
-   private Minecraft minecraft;
-   private File settingsFile;
-   public int settingCount;
+		settingCount = 8;
 
+		this.minecraft = minecraft;
 
-   public GameSettings(Minecraft var1, File var2) {
-      this.bindings = new KeyBinding[]{this.forwardKey, this.leftKey, this.backKey, this.rightKey, this.jumpKey, this.buildKey, this.chatKey, this.toggleFogKey, this.saveLocationKey, this.loadLocationKey};
-      this.settingCount = 8;
-      this.minecraft = var1;
-      this.settingsFile = new File(var2, "options.txt");
-      this.load();
-   }
+		settingsFile = new File(minecraftFolder, "options.txt");
 
-   public final String getBinding(int var1) {
-      return this.bindings[var1].name + ": " + Keyboard.getKeyName(this.bindings[var1].key);
-   }
+		load();
+	}
 
-   public final void setBinding(int var1, int var2) {
-      this.bindings[var1].key = var2;
-      this.save();
-   }
+	private static final String[] renderDistances = new String[]{"FAR", "NORMAL", "SHORT", "TINY"};
+	public boolean music = true;
+	public boolean sound = true;
+	public boolean invertMouse = false;
+	public boolean showFrameRate = false;
+	public int viewDistance = 0;
+	public boolean viewBobbing = true;
+	public boolean anaglyph = false;
+	public boolean limitFramerate = false;
+	public KeyBinding forwardKey = new KeyBinding("Forward", 17);
+	public KeyBinding leftKey = new KeyBinding("Left", 30);
+	public KeyBinding backKey = new KeyBinding("Back", 31);
+	public KeyBinding rightKey = new KeyBinding("Right", 32);
+	public KeyBinding jumpKey = new KeyBinding("Jump", 57);
+	public KeyBinding buildKey = new KeyBinding("Build", 48);
+	public KeyBinding chatKey = new KeyBinding("Chat", 20);
+	public KeyBinding toggleFogKey = new KeyBinding("Toggle fog", 33);
+	public KeyBinding saveLocationKey = new KeyBinding("Save location", 28);
+	public KeyBinding loadLocationKey = new KeyBinding("Load location", 19);
+	public KeyBinding[] bindings;
+	private Minecraft minecraft;
+	private File settingsFile;
+	public int settingCount;
 
-   public final void toggleSetting(int var1, int var2) {
-      if(var1 == 0) {
-         this.music = !this.music;
-      }
+	public String getBinding(int key)
+	{
+		return bindings[key].name + ": " + Keyboard.getKeyName(bindings[key].key);
+	}
 
-      if(var1 == 1) {
-         this.sound = !this.sound;
-      }
+	public void setBinding(int key, int keyID)
+	{
+		bindings[key].key = keyID;
 
-      if(var1 == 2) {
-         this.invertMouse = !this.invertMouse;
-      }
+		save();
+	}
 
-      if(var1 == 3) {
-         this.showFrameRate = !this.showFrameRate;
-      }
+	public void toggleSetting(int setting, int fogValue)
+	{
+		if(setting == 0)
+		{
+			music = !music;
+		}
 
-      if(var1 == 4) {
-         this.viewDistance = this.viewDistance + var2 & 3;
-      }
+		if(setting == 1)
+		{
+			sound = !sound;
+		}
 
-      if(var1 == 5) {
-         this.viewBobbing = !this.viewBobbing;
-      }
+		if(setting == 2)
+		{
+			invertMouse = !invertMouse;
+		}
 
-      if(var1 == 6) {
-         this.anaglyph = !this.anaglyph;
-         TextureManager var7 = this.minecraft.textureManager;
-         Iterator var3 = this.minecraft.textureManager.textureImages.keySet().iterator();
+		if(setting == 3)
+		{
+			showFrameRate = !showFrameRate;
+		}
 
-         int var4;
-         BufferedImage var5;
-         while(var3.hasNext()) {
-            var4 = ((Integer)var3.next()).intValue();
-            var5 = (BufferedImage)var7.textureImages.get(Integer.valueOf(var4));
-            var7.load(var5, var4);
-         }
+		if(setting == 4)
+		{
+			viewDistance = viewDistance + fogValue & 3;
+		}
 
-         var3 = var7.textures.keySet().iterator();
+		if(setting == 5)
+		{
+			viewBobbing = !viewBobbing;
+		}
 
-         while(var3.hasNext()) {
-            String var8 = (String)var3.next();
+		if(setting == 6)
+		{
+			anaglyph = !anaglyph;
 
-            try {
-               if(var8.startsWith("##")) {
-                  var5 = TextureManager.load1(ImageIO.read(TextureManager.class.getResourceAsStream(var8.substring(2))));
-               } else {
-                  var5 = ImageIO.read(TextureManager.class.getResourceAsStream(var8));
-               }
+			TextureManager textureManager = minecraft.textureManager;
+			Iterator iterator = this.minecraft.textureManager.textureImages.keySet().iterator();
 
-               var4 = ((Integer)var7.textures.get(var8)).intValue();
-               var7.load(var5, var4);
-            } catch (IOException var6) {
-               var6.printStackTrace();
-            }
-         }
-      }
+			int i;
+			BufferedImage image;
 
-      if(var1 == 7) {
-         this.limitFramerate = !this.limitFramerate;
-      }
+			while(iterator.hasNext())
+			{
+				i = (Integer)iterator.next();
+				image = (BufferedImage)textureManager.textureImages.get(Integer.valueOf(i));
 
-      this.save();
-   }
+				textureManager.load(image, i);
+			}
 
-   public final String getSetting(int var1) {
-      return var1 == 0?"Music: " + (this.music?"ON":"OFF"):(var1 == 1?"Sound: " + (this.sound?"ON":"OFF"):(var1 == 2?"Invert mouse: " + (this.invertMouse?"ON":"OFF"):(var1 == 3?"Show FPS: " + (this.showFrameRate?"ON":"OFF"):(var1 == 4?"Render distance: " + renderDistances[this.viewDistance]:(var1 == 5?"View bobbing: " + (this.viewBobbing?"ON":"OFF"):(var1 == 6?"3d anaglyph: " + (this.anaglyph?"ON":"OFF"):(var1 == 7?"Limit framerate: " + (this.limitFramerate?"ON":"OFF"):"")))))));
-   }
+			iterator = textureManager.textures.keySet().iterator();
 
-   private void load() {
-      try {
-         if(this.settingsFile.exists()) {
-            BufferedReader var1 = new BufferedReader(new FileReader(this.settingsFile));
-            String var2 = null;
+			while(iterator.hasNext())
+			{
+				String s = (String)iterator.next();
 
-            while((var2 = var1.readLine()) != null) {
-               String[] var5;
-               if((var5 = var2.split(":"))[0].equals("music")) {
-                  this.music = var5[1].equals("true");
-               }
+				try
+				{
+					if(s.startsWith("##"))
+					{
+						image = TextureManager.load1(ImageIO.read(TextureManager.class.getResourceAsStream(s.substring(2))));
+					} else {
+						image = ImageIO.read(TextureManager.class.getResourceAsStream(s));
+					}
 
-               if(var5[0].equals("sound")) {
-                  this.sound = var5[1].equals("true");
-               }
+					i = (Integer)textureManager.textures.get(s);
 
-               if(var5[0].equals("invertYMouse")) {
-                  this.invertMouse = var5[1].equals("true");
-               }
+					textureManager.load(image, i);
+				} catch (IOException var6) {
+					var6.printStackTrace();
+				}
+			}
+		}
 
-               if(var5[0].equals("showFrameRate")) {
-                  this.showFrameRate = var5[1].equals("true");
-               }
+		if(setting == 7)
+		{
+			limitFramerate = !limitFramerate;
+		}
 
-               if(var5[0].equals("viewDistance")) {
-                  this.viewDistance = Integer.parseInt(var5[1]);
-               }
+		save();
+	}
 
-               if(var5[0].equals("bobView")) {
-                  this.viewBobbing = var5[1].equals("true");
-               }
+	public String getSetting(int id)
+	{
+		return id == 0 ? "Music: " + (music ? "ON" : "OFF")
+				: (id == 1 ? "Sound: " + (sound ? "ON" : "OFF")
+				: (id == 2 ? "Invert mouse: " + (invertMouse ? "ON" : "OFF")
+				: (id == 3 ? "Show FPS: " + (showFrameRate ? "ON" : "OFF")
+				: (id == 4 ? "Render distance: " + renderDistances[viewDistance]
+				: (id == 5 ? "View bobbing: " + (viewBobbing ? "ON" : "OFF")
+				: (id == 6 ? "3d anaglyph: " + (anaglyph ? "ON" : "OFF")
+				: (id == 7 ? "Limit framerate: " + (limitFramerate ? "ON" : "OFF")
+				: "")))))));
+	}
 
-               if(var5[0].equals("anaglyph3d")) {
-                  this.anaglyph = var5[1].equals("true");
-               }
+	private void load()
+	{
+		try
+		{
+			if(settingsFile.exists())
+			{
+				FileReader fileReader = new FileReader(settingsFile);
+				BufferedReader reader = new BufferedReader(fileReader);
 
-               if(var5[0].equals("limitFramerate")) {
-                  this.limitFramerate = var5[1].equals("true");
-               }
+				String line = null;
 
-               for(int var3 = 0; var3 < this.bindings.length; ++var3) {
-                  if(var5[0].equals("key_" + this.bindings[var3].name)) {
-                     this.bindings[var3].key = Integer.parseInt(var5[1]);
-                  }
-               }
-            }
+				while((line = reader.readLine()) != null)
+				{
+					String[] setting = line.split(":");
 
-            var1.close();
-         }
-      } catch (Exception var4) {
-         System.out.println("Failed to load options");
-         var4.printStackTrace();
-      }
-   }
+					if(setting[0].equals("music"))
+					{
+						music = setting[1].equals("true");
+					}
 
-   private void save() {
-      try {
-         PrintWriter var1;
-         (var1 = new PrintWriter(new FileWriter(this.settingsFile))).println("music:" + this.music);
-         var1.println("sound:" + this.sound);
-         var1.println("invertYMouse:" + this.invertMouse);
-         var1.println("showFrameRate:" + this.showFrameRate);
-         var1.println("viewDistance:" + this.viewDistance);
-         var1.println("bobView:" + this.viewBobbing);
-         var1.println("anaglyph3d:" + this.anaglyph);
-         var1.println("limitFramerate:" + this.limitFramerate);
+					if(setting[0].equals("sound"))
+					{
+						sound = setting[1].equals("true");
+					}
 
-         for(int var2 = 0; var2 < this.bindings.length; ++var2) {
-            var1.println("key_" + this.bindings[var2].name + ":" + this.bindings[var2].key);
-         }
+					if(setting[0].equals("invertYMouse"))
+					{
+						invertMouse = setting[1].equals("true");
+					}
 
-         var1.close();
-      } catch (Exception var3) {
-         System.out.println("Failed to save options");
-         var3.printStackTrace();
-      }
-   }
+					if(setting[0].equals("showFrameRate"))
+					{
+						showFrameRate = setting[1].equals("true");
+					}
+
+					if(setting[0].equals("viewDistance"))
+					{
+						viewDistance = Integer.parseInt(setting[1]);
+					}
+
+					if(setting[0].equals("bobView"))
+					{
+						viewBobbing = setting[1].equals("true");
+					}
+
+					if(setting[0].equals("anaglyph3d"))
+					{
+						anaglyph = setting[1].equals("true");
+					}
+
+					if(setting[0].equals("limitFramerate"))
+					{
+						limitFramerate = setting[1].equals("true");
+					}
+
+					for(int index = 0; index < this.bindings.length; index++)
+					{
+						if(setting[0].equals("key_" + bindings[index].name))
+						{
+							bindings[index].key = Integer.parseInt(setting[1]);
+						}
+					}
+				}
+
+				reader.close();
+			}
+		} catch (Exception e) {
+			System.out.println("Failed to load options");
+
+			e.printStackTrace();
+		}
+	}
+
+	private void save()
+	{
+		try {
+			FileWriter fileWriter = new FileWriter(this.settingsFile);
+			PrintWriter writer = new PrintWriter(fileWriter);
+
+			writer.println("music:" + music);
+			writer.println("sound:" + sound);
+			writer.println("invertYMouse:" + invertMouse);
+			writer.println("showFrameRate:" + showFrameRate);
+			writer.println("viewDistance:" + viewDistance);
+			writer.println("bobView:" + viewBobbing);
+			writer.println("anaglyph3d:" + anaglyph);
+			writer.println("limitFramerate:" + limitFramerate);
+
+			for(int binding = 0; binding < bindings.length; binding++)
+			{
+				writer.println("key_" + bindings[binding].name + ":" + bindings[binding].key);
+			}
+
+			writer.close();
+		} catch (Exception e) {
+			System.out.println("Failed to save options");
+
+			e.printStackTrace();
+		}
+	}
 
 }
