@@ -310,7 +310,7 @@ public final class Minecraft implements Runnable {
          GL11.glLoadIdentity();
          GL11.glMatrixMode(5888);
          checkGLError("Startup");
-         String var3 = "minecraft2";
+         String var3 = "minecraftclassicforever";
          String var5 = System.getProperty("user.home", ".");
          String var6;
          File var7;

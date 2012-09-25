@@ -20,9 +20,6 @@ public class Start
 
 	public Start()
 	{
-		CookieList cookielist = new CookieList();
-		CookieHandler.setDefault(cookielist);
-
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (ClassNotFoundException e) {
@@ -39,11 +36,7 @@ public class Start
 
 		spFrame.setVisible(true);
 
-		try {
-			spFrame.startMinecraft();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		spFrame.startMinecraft();
 		spFrame.finish();
 	}
 }

@@ -82,7 +82,8 @@ public final class LogicalOggStreamImpl {
 		   } while(var4 == 255);
 
 		   return var1.toByteArray();
-	   } catch (EndOfOggStreamException e) {
+	   //} catch (EndOfOggStreamException e) {
+	   } catch (Exception e) {
 		   e.printStackTrace();
 	   }
 
