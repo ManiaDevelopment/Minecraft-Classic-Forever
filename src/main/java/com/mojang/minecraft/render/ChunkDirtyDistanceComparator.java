@@ -32,10 +32,10 @@ public class ChunkDirtyDistanceComparator implements Comparator
 					return 1;
 				}
 			} else {
-				return -1;
+				return 1;
 			}
 		} else {
-			return 1;
+			return -1;
 		}
 	}
 
