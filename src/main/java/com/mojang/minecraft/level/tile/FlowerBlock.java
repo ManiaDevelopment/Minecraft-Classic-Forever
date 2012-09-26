@@ -1,10 +1,9 @@
 package com.mojang.minecraft.level.tile;
 
 import com.mojang.minecraft.level.Level;
-import com.mojang.minecraft.level.tile.Block;
-import com.mojang.minecraft.phys.AABB;
 import com.mojang.minecraft.render.ShapeRenderer;
 import com.mojang.util.MathHelper;
+
 import java.util.Random;
 
 public class FlowerBlock extends Block {
@@ -54,10 +53,6 @@ public class FlowerBlock extends Block {
          var1.vertexUV(var9, var3, var10, var17, var18);
       }
 
-   }
-
-   public final AABB getSelectionBox(int var1, int var2, int var3) {
-      return null;
    }
 
    public final boolean isOpaque() {

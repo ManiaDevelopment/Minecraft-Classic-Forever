@@ -11,7 +11,6 @@ import com.mojang.minecraft.level.LevelIO;
 import com.mojang.minecraft.level.generator.LevelGenerator;
 import com.mojang.minecraft.level.liquid.LiquidType;
 import com.mojang.minecraft.level.tile.Block;
-import com.mojang.minecraft.level.tile.FlowerBlock;
 import com.mojang.minecraft.mob.Mob;
 import com.mojang.minecraft.model.HumanoidModel;
 import com.mojang.minecraft.model.ModelManager;
@@ -872,34 +871,31 @@ public final class Minecraft implements Runnable {
                                  GL11.glDepthMask(false);
                                  var29 = 0.002F;
                                  if((var104 = var89.level.getTile(var102.x, var102.y, var102.z)) > 0) {
-									 if(!(Block.blocks[var104] instanceof FlowerBlock))
-									 {
-										 AABB var111 = Block.blocks[var104].getSelectionBox(var102.x, var102.y, var102.z).grow(var29, var29, var29);
-										 GL11.glBegin(3);
-										 GL11.glVertex3f(var111.x0, var111.y0, var111.z0);
-										 GL11.glVertex3f(var111.x1, var111.y0, var111.z0);
-										 GL11.glVertex3f(var111.x1, var111.y0, var111.z1);
-										 GL11.glVertex3f(var111.x0, var111.y0, var111.z1);
-										 GL11.glVertex3f(var111.x0, var111.y0, var111.z0);
-										 GL11.glEnd();
-										 GL11.glBegin(3);
-										 GL11.glVertex3f(var111.x0, var111.y1, var111.z0);
-										 GL11.glVertex3f(var111.x1, var111.y1, var111.z0);
-										 GL11.glVertex3f(var111.x1, var111.y1, var111.z1);
-										 GL11.glVertex3f(var111.x0, var111.y1, var111.z1);
-										 GL11.glVertex3f(var111.x0, var111.y1, var111.z0);
-										 GL11.glEnd();
-										 GL11.glBegin(1);
-										 GL11.glVertex3f(var111.x0, var111.y0, var111.z0);
-										 GL11.glVertex3f(var111.x0, var111.y1, var111.z0);
-										 GL11.glVertex3f(var111.x1, var111.y0, var111.z0);
-										 GL11.glVertex3f(var111.x1, var111.y1, var111.z0);
-										 GL11.glVertex3f(var111.x1, var111.y0, var111.z1);
-										 GL11.glVertex3f(var111.x1, var111.y1, var111.z1);
-										 GL11.glVertex3f(var111.x0, var111.y0, var111.z1);
-										 GL11.glVertex3f(var111.x0, var111.y1, var111.z1);
-										 GL11.glEnd();
-									 }
+									 AABB var111 = Block.blocks[var104].getSelectionBox(var102.x, var102.y, var102.z).grow(var29, var29, var29);
+									 GL11.glBegin(3);
+									 GL11.glVertex3f(var111.x0, var111.y0, var111.z0);
+									 GL11.glVertex3f(var111.x1, var111.y0, var111.z0);
+									 GL11.glVertex3f(var111.x1, var111.y0, var111.z1);
+									 GL11.glVertex3f(var111.x0, var111.y0, var111.z1);
+									 GL11.glVertex3f(var111.x0, var111.y0, var111.z0);
+									 GL11.glEnd();
+									 GL11.glBegin(3);
+									 GL11.glVertex3f(var111.x0, var111.y1, var111.z0);
+									 GL11.glVertex3f(var111.x1, var111.y1, var111.z0);
+									 GL11.glVertex3f(var111.x1, var111.y1, var111.z1);
+									 GL11.glVertex3f(var111.x0, var111.y1, var111.z1);
+									 GL11.glVertex3f(var111.x0, var111.y1, var111.z0);
+									 GL11.glEnd();
+									 GL11.glBegin(1);
+									 GL11.glVertex3f(var111.x0, var111.y0, var111.z0);
+									 GL11.glVertex3f(var111.x0, var111.y1, var111.z0);
+									 GL11.glVertex3f(var111.x1, var111.y0, var111.z0);
+									 GL11.glVertex3f(var111.x1, var111.y1, var111.z0);
+									 GL11.glVertex3f(var111.x1, var111.y0, var111.z1);
+									 GL11.glVertex3f(var111.x1, var111.y1, var111.z1);
+									 GL11.glVertex3f(var111.x0, var111.y0, var111.z1);
+									 GL11.glVertex3f(var111.x0, var111.y1, var111.z1);
+									 GL11.glEnd();
                                  }
 
                                  GL11.glDepthMask(true);
