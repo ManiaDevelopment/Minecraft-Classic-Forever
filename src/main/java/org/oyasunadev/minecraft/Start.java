@@ -1,9 +1,6 @@
 package org.oyasunadev.minecraft;
 
-import org.oyasunadev.minecraft.util.net.cookie.CookieList;
-
 import javax.swing.*;
-import java.net.CookieHandler;
 
 /**
  * Created with IntelliJ IDEA.

@@ -1,6 +1,7 @@
 package org.oyasunadev.minecraft;
 
 import com.mojang.minecraft.Minecraft;
+import com.mojang.minecraft.MinecraftApplet$1;
 
 import javax.swing.*;
 import java.awt.*;
@@ -13,20 +14,21 @@ public final class SPFrame extends JFrame
 		setSize(854, 480);
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setLayout(new BorderLayout());
 	}
-
-	private Minecraft minecraft;
 
 	public void startMinecraft()
 	{
-		MCApplet mcApplet = new MCApplet();
-		Canvas canvas = new Canvas();
+		MCApplet applet = new MCApplet();
+		MinecraftApplet$1 canvas = new MinecraftApplet$1(applet);
 
-		mcApplet.setBounds(0, 0, getWidth(), getHeight());
+		Minecraft minecraft = new Minecraft(canvas, applet, getWidth(), getHeight(), false);
 
-		minecraft = new Minecraft(canvas, mcApplet, getWidth(), getHeight(), false);
+		canvas.setSize(getWidth(), getHeight());
 
-		add(canvas);
+		add(canvas, "Center");
+
+		pack();
 
 		new Thread(minecraft).start();
 	}
