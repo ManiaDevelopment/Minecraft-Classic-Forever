@@ -1,6 +1,6 @@
 Minecraft Classic Forever
 =========================
-Bringing Minecraft Classic to the opensource world!
+The Minecraft Classic Forever project brings you the source to Minecraft 0.30 (Classic) along with the latest version of J-OGG!
 
 License
 -------
