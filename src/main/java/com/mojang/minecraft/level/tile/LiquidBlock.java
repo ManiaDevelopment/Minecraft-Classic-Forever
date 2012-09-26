@@ -2,9 +2,8 @@ package com.mojang.minecraft.level.tile;
 
 import com.mojang.minecraft.level.Level;
 import com.mojang.minecraft.level.liquid.LiquidType;
-import com.mojang.minecraft.level.tile.Block;
-import com.mojang.minecraft.phys.AABB;
 import com.mojang.minecraft.render.ShapeRenderer;
+
 import java.util.Random;
 
 public class LiquidBlock extends Block {
@@ -118,10 +117,6 @@ public class LiquidBlock extends Block {
    public final void renderInside(ShapeRenderer var1, int var2, int var3, int var4, int var5) {
       super.renderInside(var1, var2, var3, var4, var5);
       super.renderSide(var1, var2, var3, var4, var5);
-   }
-
-   public final AABB getSelectionBox(int var1, int var2, int var3) {
-      return null;
    }
 
    public final boolean isOpaque() {
