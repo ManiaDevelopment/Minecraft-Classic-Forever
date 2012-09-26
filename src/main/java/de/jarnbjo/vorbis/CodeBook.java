@@ -1,138 +1,267 @@
+/*
+ * $ProjectName$
+ * $ProjectRevision$
+ * -----------------------------------------------------------
+ * $Id: CodeBook.java,v 1.3 2003/04/10 19:49:04 jarnbjo Exp $
+ * -----------------------------------------------------------
+ *
+ * $Author: jarnbjo $
+ *
+ * Description:
+ *
+ * Copyright 2002-2003 Tor-Einar Jarnbjo
+ * -----------------------------------------------------------
+ *
+ * Change History
+ * -----------------------------------------------------------
+ * $Log: CodeBook.java,v $
+ * Revision 1.3  2003/04/10 19:49:04  jarnbjo
+ * no message
+ *
+ * Revision 1.2  2003/03/16 01:11:12  jarnbjo
+ * no message
+ *
+ *
+ */
+
 package de.jarnbjo.vorbis;
 
-import de.jarnbjo.util.io.BitInputStream;
-import de.jarnbjo.util.io.HuffmanNode;
-import de.jarnbjo.vorbis.Util;
-import de.jarnbjo.vorbis.VorbisFormatException;
-import java.util.Arrays;
+import java.io.*;
 
-final class CodeBook {
+import java.text.*;
+import java.util.*;
 
-   HuffmanNode huffmanRoot;
-   int dimensions;
-   private int entries;
+import de.jarnbjo.util.io.*;
+
+class CodeBook {
+
+   private HuffmanNode huffmanRoot;
+   private int dimensions, entries;
+
    private int[] entryLengths;
-   float[][] valueVector;
+   private float[][] valueVector;
 
+   protected CodeBook(BitInputStream source) throws VorbisFormatException, IOException {
 
-   protected CodeBook(BitInputStream var1) {
-	   try
-	   {
-		   if(var1.getInt(24) != 5653314) {
-			   throw new VorbisFormatException("The code book sync pattern is not correct.");
-		   } else {
-			   this.dimensions = var1.getInt(16);
-			   this.entries = var1.getInt(24);
-			   this.entryLengths = new int[this.entries];
-			   int var2;
-			   int var3;
-			   if(var1.getBit()) {
-				   var2 = var1.getInt(5) + 1;
+      // check sync
+      if(source.getInt(24)!=0x564342) {
+         throw new VorbisFormatException("The code book sync pattern is not correct.");
+      }
 
-				   int var4;
-				   for(var3 = 0; var3 < this.entryLengths.length; var3 += var4) {
-					   var4 = var1.getInt(Util.ilog(this.entryLengths.length - var3));
-					   if(var3 + var4 > this.entryLengths.length) {
-						   throw new VorbisFormatException("The codebook entry length list is longer than the actual number of entry lengths.");
-					   }
+      dimensions=source.getInt(16);
+      entries=source.getInt(24);
 
-					   Arrays.fill(this.entryLengths, var3, var3 + var4, var2);
-					   ++var2;
-				   }
-			   } else if(var1.getBit()) {
-				   for(var3 = 0; var3 < this.entryLengths.length; ++var3) {
-					   if(var1.getBit()) {
-						   this.entryLengths[var3] = var1.getInt(5) + 1;
-					   } else {
-						   this.entryLengths[var3] = -1;
-					   }
-				   }
-			   } else {
-				   for(var3 = 0; var3 < this.entryLengths.length; ++var3) {
-					   this.entryLengths[var3] = var1.getInt(5) + 1;
-				   }
-			   }
+      entryLengths=new int[entries];
 
-			   if(!this.createHuffmanTree(this.entryLengths)) {
-				   throw new VorbisFormatException("An exception was thrown when building the codebook Huffman tree.");
-			   } else {
-				   switch(var2 = var1.getInt(4)) {
-					   case 0:
-						   return;
-					   case 1:
-					   case 2:
-						   float var14 = Util.float32unpack(var1.getInt(32));
-						   float var13 = Util.float32unpack(var1.getInt(32));
-						   int var5 = var1.getInt(4) + 1;
-						   boolean var6 = var1.getBit();
-						   boolean var7 = false;
-						   int var9;
-						   int var10;
-						   int var15;
-						   if(var2 == 1) {
-							   int var8 = this.dimensions;
-							   var15 = this.entries;
-							   int var10000 = (var9 = (int)Math.pow(2.718281828459045D, Math.log((double)var15) / (double)var8)) + 1;
-							   var10 = var8;
-							   var8 = var10000;
+      boolean ordered=source.getBit();
 
-							   int var11;
-							   for(var11 = 1; var10 > 0; var11 *= var8) {
-								   --var10;
-							   }
+      if(ordered) {
+         int cl=source.getInt(5)+1;
+         for(int i=0; i<entryLengths.length; ) {
+            int num=source.getInt(Util.ilog(entryLengths.length-i));
+            if(i+num>entryLengths.length) {
+               throw new VorbisFormatException("The codebook entry length list is longer than the actual number of entry lengths.");
+            }
+            Arrays.fill(entryLengths, i, i+num, cl);
+            cl++;
+            i+=num;
+         }
+      }
+      else {
+         // !ordered
+         boolean sparse=source.getBit();
 
-							   var15 = var11 <= var15?var9 + 1:var9;
-						   } else {
-							   var15 = this.entries * this.dimensions;
-						   }
-
-						   int[] var16 = new int[var15];
-
-						   for(var9 = 0; var9 < var16.length; ++var9) {
-							   var16[var9] = var1.getInt(var5);
-						   }
-
-						   this.valueVector = new float[this.entries][this.dimensions];
-						   if(var2 != 1) {
-							   throw new UnsupportedOperationException();
-						   } else {
-							   for(var9 = 0; var9 < this.entries; ++var9) {
-								   float var12 = 0.0F;
-								   var2 = 1;
-
-								   for(var5 = 0; var5 < this.dimensions; ++var5) {
-									   var10 = var9 / var2 % var15;
-									   this.valueVector[var9][var5] = (float)var16[var10] * var13 + var14 + var12;
-									   if(var6) {
-										   var12 = this.valueVector[var9][var5];
-									   }
-
-									   var2 *= var15;
-								   }
-							   }
-
-							   return;
-						   }
-					   default:
-						   throw new VorbisFormatException("Unsupported codebook lookup type: " + var2);
-				   }
-			   }
-		   }
-	   } catch (VorbisFormatException e) {
-		   e.printStackTrace();
-	   }
-   }
-
-   private boolean createHuffmanTree(int[] var1) {
-      this.huffmanRoot = new HuffmanNode();
-
-      for(int var2 = 0; var2 < var1.length; ++var2) {
-         int var3;
-         if((var3 = var1[var2]) > 0 && !this.huffmanRoot.setNewValue(var3, var2)) {
-            return false;
+         if(sparse) {
+            for(int i=0; i<entryLengths.length; i++) {
+               if(source.getBit()) {
+                  entryLengths[i]=source.getInt(5)+1;
+               }
+               else {
+                  entryLengths[i]=-1;
+               }
+            }
+         }
+         else {
+            // !sparse
+            for(int i=0; i<entryLengths.length; i++) {
+               entryLengths[i]=source.getInt(5)+1;
+            }
          }
       }
 
+      if (!createHuffmanTree(entryLengths)) {
+         throw new VorbisFormatException("An exception was thrown when building the codebook Huffman tree.");
+      }
+
+      int codeBookLookupType=source.getInt(4);
+
+      switch(codeBookLookupType) {
+      case 0:
+         // codebook has no scalar vectors to be calculated
+         break;
+      case 1:
+      case 2:
+         float codeBookMinimumValue=Util.float32unpack(source.getInt(32));
+         float codeBookDeltaValue=Util.float32unpack(source.getInt(32));
+
+         int codeBookValueBits=source.getInt(4)+1;
+         boolean codeBookSequenceP=source.getBit();
+
+         int codeBookLookupValues=0;
+
+         if(codeBookLookupType==1) {
+            codeBookLookupValues=Util.lookup1Values(entries, dimensions);
+         }
+         else {
+            codeBookLookupValues=entries*dimensions;
+         }
+
+         int codeBookMultiplicands[]=new int[codeBookLookupValues];
+
+         for(int i=0; i<codeBookMultiplicands.length; i++) {
+            codeBookMultiplicands[i]=source.getInt(codeBookValueBits);
+         }
+
+         valueVector=new float[entries][dimensions];
+
+         if(codeBookLookupType==1) {
+            for(int i=0; i<entries; i++) {
+               float last=0;
+               int indexDivisor=1;
+               for(int j=0; j<dimensions; j++) {
+                  int multiplicandOffset=
+                     (i/indexDivisor)%codeBookLookupValues;
+                  valueVector[i][j]=
+                     codeBookMultiplicands[multiplicandOffset]*codeBookDeltaValue+codeBookMinimumValue+last;
+                  if(codeBookSequenceP) {
+                     last=valueVector[i][j];
+                  }
+                  indexDivisor*=codeBookLookupValues;
+               }
+            }
+         }
+         else {
+            throw new UnsupportedOperationException();
+            /** @todo implement */
+         }
+         break;
+      default:
+         throw new VorbisFormatException("Unsupported codebook lookup type: "+codeBookLookupType);
+      }
+   }
+
+   private static long totalTime=0;
+
+   private boolean createHuffmanTree(int[] entryLengths) {
+      huffmanRoot=new HuffmanNode();
+      for(int i=0; i<entryLengths.length; i++) {
+         int el=entryLengths[i];
+         if(el>0) {
+            if(!huffmanRoot.setNewValue(el, i)) {
+               return false;
+            }
+         }
+      }
       return true;
    }
+
+   protected int getDimensions() {
+      return dimensions;
+   }
+
+   protected int getEntries() {
+      return entries;
+   }
+
+   protected HuffmanNode getHuffmanRoot() {
+      return huffmanRoot;
+   }
+
+   //public float[] readVQ(ReadableBitChannel source) throws IOException {
+   //   return valueVector[readInt(source)];
+   //}
+
+   protected int readInt(final BitInputStream source) throws IOException {
+      return source.getInt(huffmanRoot);
+      /*
+      HuffmanNode node;
+      for(node=huffmanRoot; node.value==null; node=source.getBit()?node.o1:node.o0);
+      return node.value.intValue();
+      */
+   }
+
+   protected void readVvAdd(float[][] a, BitInputStream source, int offset, int length)
+      throws VorbisFormatException, IOException {
+
+      int i,j;//k;//entry;
+      int chptr=0;
+      int ch=a.length;
+
+      if(ch==0) {
+         return;
+      }
+
+      int lim=(offset+length)/ch;
+
+      for(i=offset/ch;i<lim;){
+         final float[] ve=valueVector[source.getInt(huffmanRoot)];
+         for(j=0;j<dimensions;j++){
+            a[chptr++][i]+=ve[j];
+            if(chptr==ch){
+               chptr=0;
+               i++;
+	         }
+         }
+      }
+   }
+
+   /*
+   public void readVAdd(double[] a, ReadableBitChannel source, int offset, int length)
+      throws FormatException, IOException {
+
+      int i,j,entry;
+      int t;
+
+      if(dimensions>8){
+         for(i=0;i<length;){
+            entry = readInt(source);
+            //if(entry==-1)return(-1);
+	         //t=entry*dimensions;
+	         for(j=0;j<dimensions;){
+	            a[offset+(i++)]+=valueVector[entry][j++];//valuelist[t+(j++)];
+	         }
+         }
+      }
+      else{
+         for(i=0;i<length;){
+	         entry=readInt(source);
+	         //if(entry==-1)return(-1);
+	         //t=entry*dim;
+	         j=0;
+	         switch(dimensions){
+	         case 8:
+	            a[offset+(i++)]+=valueVector[entry][j++];//valuelist[t+(j++)];
+	         case 7:
+	            a[offset+(i++)]+=valueVector[entry][j++];//valuelist[t+(j++)];
+	         case 6:
+	            a[offset+(i++)]+=valueVector[entry][j++];//valuelist[t+(j++)];
+	         case 5:
+	            a[offset+(i++)]+=valueVector[entry][j++];//valuelist[t+(j++)];
+	         case 4:
+	            a[offset+(i++)]+=valueVector[entry][j++];//valuelist[t+(j++)];
+	         case 3:
+	            a[offset+(i++)]+=valueVector[entry][j++];//valuelist[t+(j++)];
+	         case 2:
+	            a[offset+(i++)]+=valueVector[entry][j++];//valuelist[t+(j++)];
+	         case 1:
+	            a[offset+(i++)]+=valueVector[entry][j++];//valuelist[t+(j++)];
+	         case 0:
+	            break;
+	         }
+         }
+      }
+   }
+   */
+
+
 }

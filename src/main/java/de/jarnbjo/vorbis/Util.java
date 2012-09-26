@@ -1,74 +1,121 @@
+/*
+ * $ProjectName$
+ * $ProjectRevision$
+ * -----------------------------------------------------------
+ * $Id: Util.java,v 1.3 2003/04/10 19:49:04 jarnbjo Exp $
+ * -----------------------------------------------------------
+ *
+ * $Author: jarnbjo $
+ *
+ * Description:
+ *
+ * Copyright 2002-2003 Tor-Einar Jarnbjo
+ * -----------------------------------------------------------
+ *
+ * Change History
+ * -----------------------------------------------------------
+ * $Log: Util.java,v $
+ * Revision 1.3  2003/04/10 19:49:04  jarnbjo
+ * no message
+ *
+ * Revision 1.2  2003/03/16 01:11:12  jarnbjo
+ * no message
+ *
+ *
+ */
+
 package de.jarnbjo.vorbis;
 
-import de.jarnbjo.vorbis.Floor;
+final public class Util {
 
-public final class Util {
-
-   public static final int ilog(int var0) {
-      int var1;
-      for(var1 = 0; var0 > 0; ++var1) {
-         var0 >>= 1;
-      }
-
-      return var1;
+   public static final int ilog(int x) {
+      int res=0;
+      for(; x>0; x>>=1, res++);
+      return res;
    }
 
-   public static final float float32unpack(int var0) {
-      float var1 = (float)(var0 & 2097151);
-      float var2 = (float)((var0 & 2145386496) >> 21);
-      if((var0 & Integer.MIN_VALUE) != 0) {
-         var1 = -var1;
+   public static final float float32unpack(int x) {
+      float mantissa=x&0x1fffff;
+      float e=(x&0x7fe00000)>>21;
+      if((x&0x80000000)!=0) {
+         mantissa=-mantissa;
       }
-
-      return var1 * (float)Math.pow(2.0D, (double)var2 - 788.0D);
+      return mantissa*(float)Math.pow(2.0, e-788.0);
    }
 
-   public static final int lowNeighbour(int[] var0, int var1) {
-      int var2 = -1;
-      int var3 = 0;
+   public static final int lookup1Values(int a, int b) {
+      int res=(int)Math.pow(Math.E, Math.log(a)/b);
+      return intPow(res+1, b)<=a?res+1:res;
+   }
 
-      for(int var4 = 0; var4 < var0.length && var4 < var1; ++var4) {
-         if(var0[var4] > var2 && var0[var4] < var0[var1]) {
-            var2 = var0[var4];
-            var3 = var4;
+   public static final int intPow(int base, int e) {
+      int res=1;
+      for(; e>0; e--, res*=base);
+      return res;
+   }
+
+   public static final boolean isBitSet(int value, int bit) {
+      return (value&(1<<bit))!=0;
+   }
+
+   public static final int icount(int value) {
+      int res=0;
+      while(value>0) {
+         res+=value&1;
+         value>>=1;
+      }
+      return res;
+   }
+
+   public static final int lowNeighbour(int[] v, int x) {
+      int max=-1, n=0;
+      for(int i=0; i<v.length && i<x; i++) {
+         if(v[i]>max && v[i]<v[x]) {
+            max=v[i];
+            n=i;
          }
       }
-
-      return var3;
+      return n;
    }
 
-   public static final int highNeighbour(int[] var0, int var1) {
-      int var2 = Integer.MAX_VALUE;
-      int var3 = 0;
-
-      for(int var4 = 0; var4 < var0.length && var4 < var1; ++var4) {
-         if(var0[var4] < var2 && var0[var4] > var0[var1]) {
-            var2 = var0[var4];
-            var3 = var4;
+   public static final int highNeighbour(int[] v, int x) {
+      int min=Integer.MAX_VALUE, n=0;
+      for(int i=0; i<v.length && i<x; i++) {
+         if(v[i]<min && v[i]>v[x]) {
+            min=v[i];
+            n=i;
          }
       }
-
-      return var3;
+      return n;
    }
 
-   public static final void renderLine(int var0, int var1, int var2, int var3, float[] var4) {
-      var3 -= var1;
-      int var5 = var2 - var0;
-      int var6 = var3 / var5;
-      int var7 = var3 < 0?var6 - 1:var6 + 1;
-      var1 = var1;
-      int var9 = 0;
-      var3 = (var3 < 0?-var3:var3) - (var6 > 0?var6 * var5:-var6 * var5);
-      var4[var0] *= Floor.DB_STATIC_TABLE[var1];
+   public static final int renderPoint(int x0, int x1, int y0, int y1, int x) {
+      int dy=y1-y0;
+      int ady=dy<0?-dy:dy;
+      int off=(ady*(x-x0))/(x1-x0);
+      return dy<0?y0-off:y0+off;
+   }
 
-      for(int var8 = var0 + 1; var8 < var2; ++var8) {
-         if((var9 += var3) >= var5) {
-            var9 -= var5;
-            var4[var8] *= Floor.DB_STATIC_TABLE[var1 += var7];
-         } else {
-            var4[var8] *= Floor.DB_STATIC_TABLE[var1 += var6];
+   public static final void renderLine(final int x0, final int y0, final int x1, final int y1, final float[] v) {
+      final int dy=y1-y0;
+      final int adx=x1-x0;
+      final int base=dy/adx;
+      final int sy=dy<0?base-1:base+1;
+      int x=x0;
+      int y=y0;
+      int err=0;
+      final int ady=(dy<0?-dy:dy)-(base>0?base*adx:-base*adx);
+
+      v[x]*=Floor.DB_STATIC_TABLE[y];
+      for(x=x0+1; x<x1; x++) {
+         err+=ady;
+         if(err>=adx) {
+            err-=adx;
+            v[x]*=Floor.DB_STATIC_TABLE[y+=sy];
+         }
+         else {
+            v[x]*=Floor.DB_STATIC_TABLE[y+=base];
          }
       }
-
    }
 }

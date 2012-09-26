@@ -2,7 +2,7 @@
  * $ProjectName$
  * $ProjectRevision$
  * -----------------------------------------------------------
- * $Id: OnDemandUrlStream.java,v 1.1 2003/04/10 19:48:22 jarnbjo Exp $
+ * $Id: BasicStream.java,v 1.1 2003/08/08 19:48:22 jarnbjo Exp $
  * -----------------------------------------------------------
  *
  * $Author: jarnbjo $
@@ -14,12 +14,7 @@
  *
  * Change History
  * -----------------------------------------------------------
- * $Log: OnDemandUrlStream.java,v $
- * Revision 1.1  2003/04/10 19:48:22  jarnbjo
- * no message
- *
- * Revision 1.1  2003/03/31 00:23:04  jarnbjo
- * no message
+ * $Log: BasicStream.java,v $
  *
  */
 
@@ -37,28 +32,19 @@ import java.util.*;
  *  like file download managers or similar.
  */
 
-public class OnDemandUrlStream implements PhysicalOggStream {
+public class BasicStream implements PhysicalOggStream {
 
    private boolean closed=false;
-   private URLConnection source;
    private InputStream sourceStream;
    private Object drainLock=new Object();
    private LinkedList pageCache=new LinkedList();
    private long numberOfSamples=-1;
-   private int contentLength=0;
    private int position=0;
 
    private HashMap logicalStreams=new HashMap();
    private OggPage firstPage;
 
-   private static final int PAGECACHE_SIZE = 20;
-
-   public OnDemandUrlStream(URL source) throws OggFormatException, IOException {
-      this.source=source.openConnection();
-      this.sourceStream=this.source.getInputStream();
-
-      contentLength=this.source.getContentLength();
-
+   public BasicStream(InputStream sourceStream) throws OggFormatException, IOException {
       firstPage=OggPage.create(sourceStream);
       position+=firstPage.getTotalLength();
       LogicalOggStreamImpl los=new LogicalOggStreamImpl(this, firstPage.getStreamSerialNumber());
@@ -80,7 +66,7 @@ public class OnDemandUrlStream implements PhysicalOggStream {
    }
 
    public int getContentLength() {
-      return contentLength;
+      return -1;
    }
 
    public int getPosition() {

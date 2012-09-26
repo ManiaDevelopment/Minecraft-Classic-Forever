@@ -1,23 +1,35 @@
 package com.mojang.minecraft.sound;
 
-import com.mojang.minecraft.sound.SoundData;
-import de.jarnbjo.ogg.EndOfOggStreamException;
 import de.jarnbjo.ogg.LogicalOggStreamImpl;
+import de.jarnbjo.ogg.OggFormatException;
 import de.jarnbjo.ogg.OnDemandUrlStream;
 import de.jarnbjo.vorbis.IdentificationHeader;
+import de.jarnbjo.vorbis.VorbisFormatException;
 import de.jarnbjo.vorbis.VorbisStream;
+
+import java.io.IOException;
 import java.net.URL;
 
 public final class SoundReader {
 
    public static SoundData read(URL var0) {
-      LogicalOggStreamImpl var11 = (LogicalOggStreamImpl)(new OnDemandUrlStream(var0)).logicalStreams.values().iterator().next();
-      VorbisStream var12 = new VorbisStream(var11);
-      byte[] var2 = new byte[4096];
+	   VorbisStream var12 = null;
+	   try
+	   {
+		   LogicalOggStreamImpl var11 = (LogicalOggStreamImpl)(new OnDemandUrlStream(var0)).getLogicalStreams().iterator().next();
+		   var12 = new VorbisStream(var11);
+	   } catch (VorbisFormatException e) {
+		   e.printStackTrace();
+	   } catch (OggFormatException e) {
+		   e.printStackTrace();
+	   } catch (IOException e) {
+		   e.printStackTrace();
+	   }
+	   byte[] var2 = new byte[4096];
       int var3 = 0;
       boolean var1 = false;
-      IdentificationHeader var14 = var12.identificationHeader;
-      int var4 = var12.identificationHeader.channels;
+      IdentificationHeader var14 = var12.getIdentificationHeader();
+      int var4 = var12.getIdentificationHeader().getChannels();
       short[] var5 = new short[4096];
       int var6 = 0;
 
@@ -71,6 +83,6 @@ public final class SoundReader {
       }
 
       IdentificationHeader var13;
-      return new SoundData(var5, (float)(var13 = var12.identificationHeader).samplerate);
+      return new SoundData(var5, (float)(var13 = var12.getIdentificationHeader()).getSampleRate());
    }
 }

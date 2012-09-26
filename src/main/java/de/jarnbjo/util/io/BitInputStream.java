@@ -1,127 +1,179 @@
+/*
+ * $ProjectName$
+ * $ProjectRevision$
+ * -----------------------------------------------------------
+ * $Id: BitInputStream.java,v 1.5 2003/04/10 19:48:31 jarnbjo Exp $
+ * -----------------------------------------------------------
+ *
+ * $Author: jarnbjo $
+ *
+ * Description:
+ *
+ * Copyright 2002-2003 Tor-Einar Jarnbjo
+ * -----------------------------------------------------------
+ *
+ * Change History
+ * -----------------------------------------------------------
+ * $Log: BitInputStream.java,v $
+ * Revision 1.5  2003/04/10 19:48:31  jarnbjo
+ * no message
+ *
+ * Revision 1.4  2003/03/16 20:57:06  jarnbjo
+ * no message
+ *
+ * Revision 1.3  2003/03/16 20:56:56  jarnbjo
+ * no message
+ *
+ * Revision 1.2  2003/03/16 01:11:39  jarnbjo
+ * no message
+ *
+ * Revision 1.1  2003/03/03 21:02:20  jarnbjo
+ * no message
+ *
+ */
+
 package de.jarnbjo.util.io;
 
-import de.jarnbjo.util.io.HuffmanNode;
+import java.io.IOException;
 
-public final class BitInputStream {
+/**
+ *	An interface with methods allowing bit-wise reading from
+ * an input stream. All methods in this interface are optional
+ * and an implementation not support a method or a specific state
+ * (e.g. endian) will throw an UnspportedOperationException if
+ * such a method is being called. This should be speicified in
+ * the implementation documentation.
+ */
 
-   private byte[] source;
-   private byte currentByte;
-   private int endian;
-   private int byteIndex;
-   private int bitIndex;
+public interface BitInputStream {
+	
+	/**
+	 *  constant for setting this stream's mode to little endian
+	 *
+	 *  @see #setEndian(int)
+	 */
+	 
+   public static final int LITTLE_ENDIAN = 0;
 
+	/**
+	 *  constant for setting this stream's mode to big endian
+	 *
+	 *  @see #setEndian(int)
+	 */
 
-   public BitInputStream(byte[] var1) {
-      this(var1, 0);
-   }
+   public static final int BIG_ENDIAN = 1;
 
-   private BitInputStream(byte[] var1, int var2) {
-      this.byteIndex = 0;
-      this.bitIndex = 0;
-      this.endian = 0;
-      this.source = var1;
-      this.currentByte = var1[0];
-      this.bitIndex = 0;
-   }
+	/**
+	 *  reads one bit (as a boolean) from the input stream
+	 *
+	 *  @return <code>true</code> if the next bit is 1, 
+	 *          <code>false</code> otherwise
+	 *
+	 *  @throws IOException if an I/O error occurs
+	 *  @throws UnsupportedOperationException if the method is not supported by the implementation
+	 */
+	 
+   public boolean getBit() throws IOException;
 
-   public final boolean getBit() {
-      if(this.endian == 0) {
-         if(this.bitIndex > 7) {
-            this.bitIndex = 0;
-            this.currentByte = this.source[++this.byteIndex];
-         }
+	/**
+	 *  reads <code>bits</code> number of bits from the input
+	 *  stream
+	 *
+	 *  @return the unsigned integer value read from the stream
+	 *
+	 *  @throws IOException if an I/O error occurs
+	 *  @throws UnsupportedOperationException if the method is not supported by the implementation
+	 */
+	 
+   public int getInt(int bits) throws IOException;
 
-         return (this.currentByte & 1 << this.bitIndex++) != 0;
-      } else {
-         if(this.bitIndex < 0) {
-            this.bitIndex = 7;
-            this.currentByte = this.source[++this.byteIndex];
-         }
+	/**
+	 *  reads <code>bits</code> number of bits from the input
+	 *  stream
+	 *
+	 *  @return the signed integer value read from the stream
+	 *
+	 *  @throws IOException if an I/O error occurs
+	 *  @throws UnsupportedOperationException if the method is not supported by the implementation
+	 */
 
-         return (this.currentByte & 1 << this.bitIndex--) != 0;
-      }
-   }
+   public int getSignedInt(int bits) throws IOException;
 
-   public final int getInt(int var1) {
-      if(var1 > 32) {
-         throw new IllegalArgumentException("Argument \"bits\" must be <= 32");
-      } else {
-         int var2 = 0;
-         int var3;
-         if(this.endian == 0) {
-            for(var3 = 0; var3 < var1; ++var3) {
-               if(this.getBit()) {
-                  var2 |= 1 << var3;
-               }
-            }
-         } else {
-            if(this.bitIndex < 0) {
-               this.bitIndex = 7;
-               this.currentByte = this.source[++this.byteIndex];
-            }
+	/**
+	 *  reads a huffman codeword based on the <code>root</code> 
+	 *  parameter and returns the decoded value
+	 *
+	 *  @param root the root of the Huffman tree used to decode the codeword
+	 *  @return the decoded unsigned integer value read from the stream
+	 *
+	 *  @throws IOException if an I/O error occurs
+	 *  @throws UnsupportedOperationException if the method is not supported by the implementation
+	 */
 
-            if(var1 <= this.bitIndex + 1) {
-               var3 = this.currentByte & 255;
-               var2 = 1 + this.bitIndex - var1;
-               int var4 = (1 << var1) - 1 << var2;
-               var2 = (var3 & var4) >> var2;
-               this.bitIndex -= var1;
-            } else {
-               var2 = (this.currentByte & 255 & (1 << this.bitIndex + 1) - 1) << var1 - this.bitIndex - 1;
-               var1 -= this.bitIndex + 1;
+   public int getInt(HuffmanNode root) throws IOException;
 
-               for(this.currentByte = this.source[++this.byteIndex]; var1 >= 8; this.currentByte = this.source[++this.byteIndex]) {
-                  var1 -= 8;
-                  var2 |= (this.source[this.byteIndex] & 255) << var1;
-               }
+	/**
+	 *  reads an integer encoded as "signed rice" as described in
+	 *  the FLAC audio format specification
+	 *
+	 *  @param order 
+	 *  @return the decoded integer value read from the stream
+	 *
+	 *  @throws IOException if an I/O error occurs
+	 *  @throws UnsupportedOperationException if the method is not supported by the implementation
+	 */
 
-               if(var1 > 0) {
-                  var3 = this.source[this.byteIndex] & 255;
-                  var2 |= var3 >> 8 - var1 & (1 << var1) - 1;
-                  this.bitIndex = 7 - var1;
-               } else {
-                  this.currentByte = this.source[--this.byteIndex];
-                  this.bitIndex = -1;
-               }
-            }
-         }
+   public int readSignedRice(int order) throws IOException;
 
-         return var2;
-      }
-   }
+	/**
+	 *  fills the array from <code>offset</code> with <code>len</code> 
+	 *  integers encoded as "signed rice" as described in
+	 *  the FLAC audio format specification
+	 *
+	 *  @param order 
+	 *  @param buffer
+	 *  @param offset
+	 *  @param len 
+	 *  @return the decoded integer value read from the stream
+	 *
+	 *  @throws IOException if an I/O error occurs
+	 *  @throws UnsupportedOperationException if the method is not supported by the implementation
+	 */
 
-   public final int getInt(HuffmanNode var1) {
-      for(; var1.value == null; var1 = (this.currentByte & 1 << this.bitIndex++) != 0?var1.o1:var1.o0) {
-         if(this.bitIndex > 7) {
-            this.bitIndex = 0;
-            this.currentByte = this.source[++this.byteIndex];
-         }
-      }
+   public void readSignedRice(int order, int[] buffer, int offset, int len) throws IOException;
 
-      return var1.value.intValue();
-   }
+	/**
+	 *  reads <code>bits</code> number of bits from the input
+	 *  stream
+	 *
+	 *  @return the unsigned long value read from the stream
+	 *
+	 *  @throws IOException if an I/O error occurs
+	 *  @throws UnsupportedOperationException if the method is not supported by the implementation
+	 */
 
-   public final long getLong(int var1) {
-      if(var1 > 64) {
-         throw new IllegalArgumentException("Argument \"bits\" must be <= 64");
-      } else {
-         long var2 = 0L;
-         int var4;
-         if(this.endian == 0) {
-            for(var4 = 0; var4 < var1; ++var4) {
-               if(this.getBit()) {
-                  var2 |= 1L << var4;
-               }
-            }
-         } else {
-            for(var4 = var1 - 1; var4 >= 0; --var4) {
-               if(this.getBit()) {
-                  var2 |= 1L << var4;
-               }
-            }
-         }
+   public long getLong(int bits) throws IOException;
 
-         return var2;
-      }
-   }
+	/**
+	 *  causes the read pointer to be moved to the beginning
+	 *  of the next byte, remaining bits in the current byte
+	 *  are discarded
+	 *
+	 *  @throws UnsupportedOperationException if the method is not supported by the implementation
+	 */
+
+   public void align();
+
+	/**
+	 *  changes the endian mode used when reading bit-wise from
+	 *  the stream, changing the mode mid-stream will cause the
+	 *  read cursor to move to the beginning of the next byte
+	 *  (as if calling the <code>allign</code> method
+	 *
+	 *  @see #align()
+	 *
+	 *  @throws UnsupportedOperationException if the method is not supported by the implementation
+	 */
+
+   public void setEndian(int endian);
 }

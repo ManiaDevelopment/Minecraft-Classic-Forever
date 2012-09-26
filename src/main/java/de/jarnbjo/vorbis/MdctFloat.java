@@ -1,228 +1,312 @@
+/*
+ * $ProjectName$
+ * $ProjectRevision$
+ * -----------------------------------------------------------
+ * $Id: MdctFloat.java,v 1.3 2003/04/10 19:49:04 jarnbjo Exp $
+ * -----------------------------------------------------------
+ *
+ * $Author: jarnbjo $
+ *
+ * Description:
+ *
+ * Copyright 2002-2003 Tor-Einar Jarnbjo
+ * -----------------------------------------------------------
+ *
+ * Change History
+ * -----------------------------------------------------------
+ * $Log: MdctFloat.java,v $
+ * Revision 1.3  2003/04/10 19:49:04  jarnbjo
+ * no message
+ *
+ * Revision 1.2  2003/03/16 01:11:12  jarnbjo
+ * no message
+ *
+ *
+ */
+
 package de.jarnbjo.vorbis;
 
-import com.mojang.util.MathHelper;
+class MdctFloat {
+  static private final float cPI3_8=0.38268343236508977175f;
+  static private final float cPI2_8=0.70710678118654752441f;
+  static private final float cPI1_8=0.92387953251128675613f;
 
-final class MdctFloat {
+  private int n;
+  private int log2n;
 
-   private int n;
-   private int log2n;
-   private float[] trig;
-   private int[] bitrev;
-   private float dtmp1;
-   private float dtmp2;
-   private float dtmp3;
-   private float dtmp4;
-   private float[] _x = new float[1024];
-   private float[] _w = new float[1024];
+  private float[] trig;
+  private int[] bitrev;
 
+  private float[] equalizer;
 
-   protected MdctFloat(int var1) {
-      this.bitrev = new int[var1 / 4];
-      this.trig = new float[var1 + var1 / 4];
-      this.log2n = (int)Math.rint(Math.log((double)var1) / Math.log(2.0D));
-      this.n = var1;
-      int var2;
-      int var3 = (var2 = 0 + var1 / 2) + 1;
-      int var4;
-      int var5 = (var4 = var2 + var1 / 2) + 1;
+  private float scale;
 
-      int var6;
-      for(var6 = 0; var6 < var1 / 4; ++var6) {
-         this.trig[0 + (var6 << 1)] = MathHelper.cos(3.1415927F / (float)var1 * (float)(var6 * 4));
-         this.trig[1 + (var6 << 1)] = -MathHelper.sin(3.1415927F / (float)var1 * (float)(var6 * 4));
-         this.trig[var2 + (var6 << 1)] = MathHelper.cos(3.1415927F / (float)(var1 * 2) * (float)(var6 * 2 + 1));
-         this.trig[var3 + (var6 << 1)] = MathHelper.sin(3.1415927F / (float)(var1 * 2) * (float)(var6 * 2 + 1));
+  private int itmp1, itmp2, itmp3, itmp4, itmp5, itmp6, itmp7, itmp8, itmp9;
+  private float dtmp1, dtmp2, dtmp3, dtmp4, dtmp5, dtmp6, dtmp7, dtmp8, dtmp9;
+
+  protected MdctFloat(int n) {
+    bitrev=new int[n/4];
+    trig=new float[n+n/4];
+
+    int n2=n>>>1;
+    log2n=(int)Math.rint(Math.log(n)/Math.log(2));
+    this.n=n;
+
+    int AE=0;
+    int AO=1;
+    int BE=AE+n/2;
+    int BO=BE+1;
+    int CE=BE+n/2;
+    int CO=CE+1;
+    // trig lookups...
+    for(int i=0;i<n/4;i++){
+      trig[AE+i*2]=(float)Math.cos((Math.PI/n)*(4*i));
+      trig[AO+i*2]=(float)-Math.sin((Math.PI/n)*(4*i));
+      trig[BE+i*2]=(float)Math.cos((Math.PI/(2*n))*(2*i+1));
+      trig[BO+i*2]=(float)Math.sin((Math.PI/(2*n))*(2*i+1));
+    }
+    for(int i=0;i<n/8;i++){
+      trig[CE+i*2]=(float)Math.cos((Math.PI/n)*(4*i+2));
+      trig[CO+i*2]=(float)-Math.sin((Math.PI/n)*(4*i+2));
+    }
+
+    {
+      int mask=(1<<(log2n-1))-1;
+      int msb=1<<(log2n-2);
+      for(int i=0;i<n/8;i++){
+	int acc=0;
+	for(int j=0;msb>>>j!=0;j++)
+	  if(((msb>>>j)&i)!=0)acc|=1<<j;
+	bitrev[i*2]=((~acc)&mask);
+//	bitrev[i*2]=((~acc)&mask)-1;
+	bitrev[i*2+1]=acc;
       }
+    }
+    scale=4.f/n;
+  }
 
-      for(var6 = 0; var6 < var1 / 8; ++var6) {
-         this.trig[var4 + (var6 << 1)] = MathHelper.cos(3.1415927F / (float)var1 * (float)(var6 * 4 + 2));
-         this.trig[var5 + (var6 << 1)] = -MathHelper.sin(3.1415927F / (float)var1 * (float)(var6 * 4 + 2));
-      }
+  //void clear(){
+  //}
 
-      var6 = (1 << this.log2n - 1) - 1;
-      var2 = 1 << this.log2n - 2;
+  //void forward(float[] in, float[] out){
+  //}
 
-      for(var3 = 0; var3 < var1 / 8; ++var3) {
-         var4 = 0;
+   private float[] _x=new float[1024];
+   private float[] _w=new float[1024];
 
-         for(var5 = 0; var2 >>> var5 != 0; ++var5) {
-            if((var2 >>> var5 & var3) != 0) {
-               var4 |= 1 << var5;
-            }
-         }
-
-         this.bitrev[var3 << 1] = ~var4 & var6;
-         this.bitrev[(var3 << 1) + 1] = var4;
-      }
-
+   protected void setEqualizer(float[] equalizer) {
+      this.equalizer=equalizer;
    }
 
-   protected final synchronized void imdct(float[] var1, float[] var2, int[] var3) {
-      var1 = var1;
-      if(this._x.length < this.n / 2) {
-         this._x = new float[this.n / 2];
+   protected float[] getEqualizer() {
+      return equalizer;
+   }
+
+   protected synchronized void imdct(final float[] frq, final float[] window, final int[] pcm) {//, float[] out){
+
+      float[] in=frq;//, out=buf;
+      if(_x.length<n/2){_x=new float[n/2];}
+      if(_w.length<n/2){_w=new float[n/2];}
+      final float[] x=_x;
+      final float[] w=_w;
+      int n2=n>>1;
+      int n4=n>>2;
+      int n8=n>>3;
+
+      if(equalizer!=null) {
+         for(int i=0; i<n; i++) {
+            frq[i]*=equalizer[i];
+         }
       }
 
-      if(this._w.length < this.n / 2) {
-         this._w = new float[this.n / 2];
-      }
+      // rotate + step 1
+      {
+         int inO=-1;
+         int xO=0;
+         int A=n2;
 
-      float[] var4 = this._x;
-      float[] var5 = this._w;
-      int var6 = this.n >> 1;
-      int var7 = this.n >> 2;
-      int var8 = this.n >> 3;
-      int var9 = -1;
-      int var10 = 0;
-      int var11 = var6;
-
-      int var12;
-      for(var12 = 0; var12 < var8; ++var12) {
-         var9 += 2;
-         this.dtmp1 = var1[var9];
-         var9 += 2;
-         this.dtmp2 = var1[var9];
-         --var11;
-         this.dtmp3 = this.trig[var11];
-         --var11;
-         this.dtmp4 = this.trig[var11];
-         var4[var10++] = -this.dtmp2 * this.dtmp3 - this.dtmp1 * this.dtmp4;
-         var4[var10++] = this.dtmp1 * this.dtmp3 - this.dtmp2 * this.dtmp4;
-      }
-
-      var9 = var6;
-
-      for(var12 = 0; var12 < var8; ++var12) {
-         var9 -= 2;
-         this.dtmp1 = var1[var9];
-         var9 -= 2;
-         this.dtmp2 = var1[var9];
-         --var11;
-         this.dtmp3 = this.trig[var11];
-         --var11;
-         this.dtmp4 = this.trig[var11];
-         var4[var10++] = this.dtmp2 * this.dtmp3 + this.dtmp1 * this.dtmp4;
-         var4[var10++] = this.dtmp2 * this.dtmp4 - this.dtmp1 * this.dtmp3;
-      }
-
-      var11 = var8;
-      var10 = var7;
-      var9 = var6;
-      var8 = this.n;
-      var5 = var5;
-      var4 = var4;
-      MdctFloat var25 = this;
-      var12 = var7;
-      int var13 = 0;
-      int var14 = var7;
-      int var15 = var6;
-
-      int var16;
-      for(var16 = 0; var16 < var10; ++var16) {
-         float var17 = var4[var12] - var4[var13];
-         var5[var14 + var16] = var4[var12++] + var4[var13++];
-         float var18 = var4[var12] - var4[var13];
-         var15 -= 4;
-         var5[var16++] = var17 * var25.trig[var15] + var18 * var25.trig[var15 + 1];
-         var5[var16] = var18 * var25.trig[var15] - var17 * var25.trig[var15 + 1];
-         var5[var14 + var16] = var4[var12++] + var4[var13++];
-      }
-
-      int var19;
-      float var21;
-      float var20;
-      float var23;
-      float var24;
-      int var34;
-      int var35;
-      for(var16 = 0; var16 < var25.log2n - 3; ++var16) {
-         var34 = var8 >>> var16 + 2;
-         var35 = 1 << var16 + 3;
-         var10 = var9 - 2;
-         var15 = 0;
-
-         for(var13 = 0; var13 < var34 >>> 2; ++var13) {
-            var19 = var10;
-            var14 = var10 - (var34 >> 1);
-            var20 = var25.trig[var15];
-            var21 = var25.trig[var15 + 1];
-            var10 -= 2;
-            ++var34;
-
-            for(int var22 = 0; var22 < 2 << var16; ++var22) {
-               var25.dtmp1 = var5[var19];
-               var25.dtmp2 = var5[var14];
-               var23 = var25.dtmp1 - var25.dtmp2;
-               var4[var19] = var25.dtmp1 + var25.dtmp2;
-               ++var19;
-               var25.dtmp1 = var5[var19];
-               ++var14;
-               var25.dtmp2 = var5[var14];
-               var24 = var25.dtmp1 - var25.dtmp2;
-               var4[var19] = var25.dtmp1 + var25.dtmp2;
-               var4[var14] = var24 * var20 - var23 * var21;
-               var4[var14 - 1] = var23 * var20 + var24 * var21;
-               var19 -= var34;
-               var14 -= var34;
-            }
-
-            --var34;
-            var15 += var35;
+         int i;
+         for(i=0;i<n8;i++) {
+            dtmp1=in[inO+=2];
+            dtmp2=in[inO+=2];
+            dtmp3=trig[--A];
+            dtmp4=trig[--A];
+	         x[xO++]=-dtmp2*dtmp3 - dtmp1*dtmp4;
+	         x[xO++]= dtmp1*dtmp3 - dtmp2*dtmp4;
+	         //A-=2;
+	         //x[xO++]=-in[inO+2]*trig[A+1] - in[inO]*trig[A];
+	         //x[xO++]= in[inO]*trig[A+1] - in[inO+2]*trig[A];
+	         //inO+=4;
          }
 
-         float[] var33 = var5;
-         var5 = var4;
-         var4 = var33;
+         inO=n2;//-4;
+
+         for(i=0;i<n8;i++) {
+            dtmp1=in[inO-=2];
+            dtmp2=in[inO-=2];
+            dtmp3=trig[--A];
+            dtmp4=trig[--A];
+	         x[xO++]=dtmp2*dtmp3 + dtmp1*dtmp4;
+	         x[xO++]=dtmp2*dtmp4 - dtmp1*dtmp3;
+	         //A-=2;
+	         //x[xO++]=in[inO]*trig[A+1] + in[inO+2]*trig[A];
+	         //x[xO++]=in[inO]*trig[A] - in[inO+2]*trig[A+1];
+	         //inO-=4;
+         }
       }
 
-      var16 = var8;
-      var34 = 0;
-      var35 = 0;
-      var10 = var9 - 1;
+      float[] xxx=kernel(x,w,n,n2,n4,n8);
+      int xx=0;
 
-      float var29;
-      float var32;
-      for(var12 = 0; var12 < var11; ++var12) {
-         var13 = var25.bitrev[var34++];
-         var19 = var25.bitrev[var34++];
-         var20 = var5[var13] - var5[var19 + 1];
-         var24 = var5[var13 - 1] + var5[var19];
-         var21 = var5[var13] + var5[var19 + 1];
-         var23 = var5[var13 - 1] - var5[var19];
-         float var36 = var20 * var25.trig[var16];
-         var29 = var24 * var25.trig[var16++];
-         float var30 = var20 * var25.trig[var16];
-         var32 = var24 * var25.trig[var16++];
-         var4[var35++] = (var21 + var30 + var29) * 16383.0F;
-         var4[var10--] = (-var23 + var32 - var36) * 16383.0F;
-         var4[var35++] = (var23 + var32 - var36) * 16383.0F;
-         var4[var10--] = (var21 - var30 - var29) * 16383.0F;
+      // step 8
+
+      {
+         int B=n2;
+         int o1=n4,o2=o1-1;
+         int o3=n4+n2,o4=o3-1;
+
+         for(int i=0;i<n4;i++){
+            dtmp1=xxx[xx++];
+            dtmp2=xxx[xx++];
+            dtmp3=trig[B++];
+            dtmp4=trig[B++];
+
+	         float temp1= (dtmp1* dtmp4 - dtmp2 * dtmp3);
+	         float temp2=-(dtmp1 * dtmp3 + dtmp2 * dtmp4);
+
+            /*
+	         float temp1= (xxx[xx] * trig[B+1] - xxx[xx+1] * trig[B]);//*32767.0f;
+	         float temp2=-(xxx[xx] * trig[B] + xxx[xx+1] * trig[B+1]);//*32767.0f;
+            */
+
+            //if(temp1>32767.0f) temp1=32767.0f;
+            //if(temp1<-32768.0f) temp1=-32768.0f;
+            //if(temp2>32767.0f) temp2=32767.0f;
+            //if(temp2<-32768.0f) temp2=-32768.0f;
+
+	         pcm[o1]=(int)(-temp1*window[o1]);
+	         pcm[o2]=(int)( temp1*window[o2]);
+	         pcm[o3]=(int)( temp2*window[o3]);
+	         pcm[o4]=(int)( temp2*window[o4]);
+
+	         o1++;
+	         o2--;
+	         o3++;
+	         o4--;
+	         //xx+=2;
+	         //B+=2;
+         }
       }
-
-      float[] var31 = var4;
-      var10 = 0;
-      var11 = var6;
-      var12 = var7;
-      int var26 = var7 - 1;
-      int var27;
-      int var28 = (var27 = var7 + var6) - 1;
-
-      for(var6 = 0; var6 < var7; ++var6) {
-         this.dtmp1 = var31[var10++];
-         this.dtmp2 = var31[var10++];
-         this.dtmp3 = this.trig[var11++];
-         this.dtmp4 = this.trig[var11++];
-         var29 = this.dtmp1 * this.dtmp4 - this.dtmp2 * this.dtmp3;
-         var32 = -(this.dtmp1 * this.dtmp3 + this.dtmp2 * this.dtmp4);
-         var3[var12] = (int)(-var29 * var2[var12]);
-         var3[var26] = (int)(var29 * var2[var26]);
-         var3[var27] = (int)(var32 * var2[var27]);
-         var3[var28] = (int)(var32 * var2[var28]);
-         ++var12;
-         --var26;
-         ++var27;
-         --var28;
-      }
-
    }
+
+   private float[] kernel(float[] x, float[] w,
+	                       int n, int n2, int n4, int n8){
+      // step 2
+
+      int xA=n4;
+      int xB=0;
+      int w2=n4;
+      int A=n2;
+
+      for(int i=0;i<n4;){
+         float x0=x[xA] - x[xB];
+         float x1;
+         w[w2+i]=x[xA++]+x[xB++];
+
+         x1=x[xA]-x[xB];
+         A-=4;
+
+         w[i++]=   x0 * trig[A] + x1 * trig[A+1];
+         w[i]=     x1 * trig[A] - x0 * trig[A+1];
+
+         w[w2+i]=x[xA++]+x[xB++];
+         i++;
+      }
+
+      // step 3
+
+      {
+         for(int i=0;i<log2n-3;i++){
+            int k0=n>>>(i+2);
+	         int k1=1<<(i+3);
+	         int wbase=n2-2;
+
+	         A=0;
+	         float[] temp;
+
+	         for(int r=0;r<(k0>>>2);r++){
+               int w1=wbase;
+               w2=w1-(k0>>1);
+               float AEv= trig[A],wA;
+               float AOv= trig[A+1],wB;
+               wbase-=2;
+
+               k0++;
+               for(int s=0;s<(2<<i);s++){
+                  dtmp1=w[w1];
+                  dtmp2=w[w2];
+                  wB=dtmp1-dtmp2;
+                  x[w1]=dtmp1+dtmp2;
+                  dtmp1=w[++w1];
+                  dtmp2=w[++w2];
+                  wA=dtmp1-dtmp2;
+                  x[w1]=dtmp1+dtmp2;
+                  x[w2]  =wA*AEv  - wB*AOv;
+                  x[w2-1]=wB*AEv  + wA*AOv;
+
+                  /*
+                  wB     =w[w1]   -w[w2];
+                  x[w1]  =w[w1]   +w[w2];
+
+                  wA     =w[++w1] -w[++w2];
+                  x[w1]  =w[w1]   +w[w2];
+
+                  x[w2]  =wA*AEv  - wB*AOv;
+                  x[w2-1]=wB*AEv  + wA*AOv;
+                  */
+
+                  w1-=k0;
+                  w2-=k0;
+	            }
+	            k0--;
+	            A+=k1;
+	         }
+
+	         temp=w;
+	         w=x;
+	         x=temp;
+         }
+      }
+
+      // step 4, 5, 6, 7
+      {
+         int C=n;
+         int bit=0;
+         int x1=0;
+         int x2=n2-1;
+
+         for(int i=0;i<n8;i++) {
+            int t1=bitrev[bit++];
+            int t2=bitrev[bit++];
+
+            float wA=w[t1]-w[t2+1];
+            float wB=w[t1-1]+w[t2];
+            float wC=w[t1]+w[t2+1];
+            float wD=w[t1-1]-w[t2];
+
+            float wACE=wA* trig[C];
+            float wBCE=wB* trig[C++];
+            float wACO=wA* trig[C];
+            float wBCO=wB* trig[C++];
+
+            x[x1++]=( wC+wACO+wBCE)*16383.0f;
+            x[x2--]=(-wD+wBCO-wACE)*16383.0f;
+            x[x1++]=( wD+wBCO-wACE)*16383.0f;
+            x[x2--]=( wC-wACO-wBCE)*16383.0f;
+         }
+      }
+      return x;
+   }
+
 }
+

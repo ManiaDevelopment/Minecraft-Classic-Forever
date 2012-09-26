@@ -1,44 +1,68 @@
+/*
+ * $ProjectName$
+ * $ProjectRevision$
+ * -----------------------------------------------------------
+ * $Id: Floor0.java,v 1.2 2003/03/16 01:11:12 jarnbjo Exp $
+ * -----------------------------------------------------------
+ *
+ * $Author: jarnbjo $
+ *
+ * Description:
+ *
+ * Copyright 2002-2003 Tor-Einar Jarnbjo
+ * -----------------------------------------------------------
+ *
+ * Change History
+ * -----------------------------------------------------------
+ * $Log: Floor0.java,v $
+ * Revision 1.2  2003/03/16 01:11:12  jarnbjo
+ * no message
+ *
+ *
+ */
+ 
 package de.jarnbjo.vorbis;
 
+import java.io.IOException;
+
 import de.jarnbjo.util.io.BitInputStream;
-import de.jarnbjo.vorbis.Floor;
-import de.jarnbjo.vorbis.SetupHeader;
-import de.jarnbjo.vorbis.VorbisFormatException;
-import de.jarnbjo.vorbis.VorbisStream;
 
-final class Floor0 extends Floor {
+class Floor0 extends Floor {
 
-   private int[] bookList;
+   private int order, rate, barkMapSize, amplitudeBits, amplitudeOffset;
+   private int bookList[];
 
+   protected Floor0(BitInputStream source, SetupHeader header) throws VorbisFormatException, IOException {
 
-   protected Floor0(BitInputStream var1, SetupHeader var2) {
-	   try
-	   {
-		   var1.getInt(8);
-		   var1.getInt(16);
-		   var1.getInt(16);
-		   var1.getInt(6);
-		   var1.getInt(8);
-		   int var3 = var1.getInt(4) + 1;
-		   this.bookList = new int[var3];
+      order=source.getInt(8);
+      rate=source.getInt(16);
+      barkMapSize=source.getInt(16);
+      amplitudeBits=source.getInt(6);
+      amplitudeOffset=source.getInt(8);
 
-		   for(var3 = 0; var3 < this.bookList.length; ++var3) {
-			   this.bookList[var3] = var1.getInt(8);
-			   if(this.bookList[var3] > var2.codeBooks.length) {
-				   throw new VorbisFormatException("A floor0_book_list entry is higher than the code book count.");
-			   }
-		   }
-	   } catch (VorbisFormatException e) {
-		   e.printStackTrace();
-	   }
+      int bookCount=source.getInt(4)+1;
+      bookList=new int[bookCount];
 
+      for(int i=0; i<bookList.length; i++) {
+         bookList[i]=source.getInt(8);
+         if(bookList[i]>header.getCodeBooks().length) {
+            throw new VorbisFormatException("A floor0_book_list entry is higher than the code book count.");
+         }
+      }
    }
 
-   protected final Floor decodeFloor(VorbisStream var1, BitInputStream var2) {
+   protected int getType() {
+      return 0;
+   }
+
+   protected Floor decodeFloor(VorbisStream vorbis, BitInputStream source) throws VorbisFormatException, IOException {
+      /** @todo implement */
       throw new UnsupportedOperationException();
    }
 
-   protected final void computeFloor(float[] var1) {
+   protected void computeFloor(float[] vector) {
+      /** @todo implement */
       throw new UnsupportedOperationException();
    }
+
 }

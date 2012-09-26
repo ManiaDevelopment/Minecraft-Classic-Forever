@@ -1,242 +1,320 @@
+/*
+ * $ProjectName$
+ * $ProjectRevision$
+ * -----------------------------------------------------------
+ * $Id: AudioPacket.java,v 1.2 2003/03/16 01:11:12 jarnbjo Exp $
+ * -----------------------------------------------------------
+ *
+ * $Author: jarnbjo $
+ *
+ * Description:
+ *
+ * Copyright 2002-2003 Tor-Einar Jarnbjo
+ * -----------------------------------------------------------
+ *
+ * Change History
+ * -----------------------------------------------------------
+ * $Log: AudioPacket.java,v $
+ * Revision 1.2  2003/03/16 01:11:12  jarnbjo
+ * no message
+ *
+ *
+ */
+
 package de.jarnbjo.vorbis;
 
-import com.mojang.util.MathHelper;
-import de.jarnbjo.util.io.BitInputStream;
-import de.jarnbjo.vorbis.Floor;
-import de.jarnbjo.vorbis.IdentificationHeader;
-import de.jarnbjo.vorbis.Mapping;
-import de.jarnbjo.vorbis.Mode;
-import de.jarnbjo.vorbis.Residue;
-import de.jarnbjo.vorbis.SetupHeader;
-import de.jarnbjo.vorbis.Util;
-import de.jarnbjo.vorbis.VorbisFormatException;
-import de.jarnbjo.vorbis.VorbisStream;
+import java.io.IOException;
+import java.util.*;
 
-public final class AudioPacket {
+import de.jarnbjo.util.io.*;
+
+class AudioPacket {
 
    private int modeNumber;
    private Mode mode;
    private Mapping mapping;
-   private int n;
-   private boolean blockFlag;
-   private boolean previousWindowFlag;
-   private boolean nextWindowFlag;
-   private int windowCenter;
-   private int leftWindowStart;
-   private int leftWindowEnd;
-   private int leftN;
-   private int rightWindowStart;
-   private int rightWindowEnd;
+   private int n; // block size
+   private boolean blockFlag, previousWindowFlag, nextWindowFlag;
+
+   private int windowCenter, leftWindowStart, leftWindowEnd, leftN, rightWindowStart, rightWindowEnd, rightN;
    private float[] window;
    private float[][] pcm;
    private int[][] pcmInt;
+
    private Floor[] channelFloors;
    private boolean[] noResidues;
-   private static final float[][] windows = new float[8][];
 
+   private final static float[][] windows=new float[8][];
 
-   protected AudioPacket(VorbisStream var1, BitInputStream var2) {
-	   try
-	   {
-		   SetupHeader var4 = var1.setupHeader;
-		   IdentificationHeader var5 = var1.identificationHeader;
-		   Mode[] var7 = var4.modes;
-		   Mapping[] var8 = var4.mappings;
-		   Residue[] var9 = var4.residues;
-		   int var10 = var5.channels;
-		   if(var2.getInt(1) != 0) {
-			   throw new VorbisFormatException("Packet type mismatch when trying to create an audio packet.");
-		   } else {
-			   this.modeNumber = var2.getInt(Util.ilog(var7.length - 1));
+   protected AudioPacket(final VorbisStream vorbis, final BitInputStream source) throws VorbisFormatException, IOException {
 
-			   try {
-				   this.mode = var7[this.modeNumber];
-			   } catch (ArrayIndexOutOfBoundsException var14) {
-				   throw new VorbisFormatException("Reference to invalid mode in audio packet.");
-			   }
+      final SetupHeader sHeader=vorbis.getSetupHeader();
+      final IdentificationHeader iHeader=vorbis.getIdentificationHeader();
+      final Mode[] modes=sHeader.getModes();
+      final Mapping[] mappings=sHeader.getMappings();
+      final Residue[] residues=sHeader.getResidues();
+      final int channels=iHeader.getChannels();
 
-			   Mode var6 = this.mode;
-			   this.mapping = var8[this.mode.mapping];
-			   int[] var19 = this.mapping.getMagnitudes();
-			   int[] var21 = this.mapping.getAngles();
-			   var6 = this.mode;
-			   this.blockFlag = this.mode.blockFlag;
-			   int var18 = var5.blockSize0;
-			   int var11 = var5.blockSize1;
-			   this.n = this.blockFlag?var11:var18;
-			   if(this.blockFlag) {
-				   this.previousWindowFlag = var2.getBit();
-				   this.nextWindowFlag = var2.getBit();
-			   }
+      if(source.getInt(1)!=0) {
+         throw new VorbisFormatException("Packet type mismatch when trying to create an audio packet.");
+      }
 
-			   this.windowCenter = this.n / 2;
-			   if(this.blockFlag && !this.previousWindowFlag) {
-				   this.leftWindowStart = this.n / 4 - var18 / 4;
-				   this.leftWindowEnd = this.n / 4 + var18 / 4;
-				   this.leftN = var18 / 2;
-			   } else {
-				   this.leftWindowStart = 0;
-				   this.leftWindowEnd = this.n / 2;
-				   this.leftN = this.windowCenter;
-			   }
+      modeNumber=source.getInt(Util.ilog(modes.length-1));
 
-			   if(this.blockFlag && !this.nextWindowFlag) {
-				   this.rightWindowStart = this.n * 3 / 4 - var18 / 4;
-				   this.rightWindowEnd = var18 / 2;
-			   } else {
-				   this.rightWindowStart = this.windowCenter;
-				   this.rightWindowEnd = this.n / 2;
-			   }
+      try {
+         mode=modes[modeNumber];
+      }
+      catch(ArrayIndexOutOfBoundsException e) {
+         throw new VorbisFormatException("Reference to invalid mode in audio packet.");
+      }
 
-			   this.window = this.getComputedWindow();
-			   this.channelFloors = new Floor[var10];
-			   this.noResidues = new boolean[var10];
-			   this.pcm = new float[var10][this.n];
-			   this.pcmInt = new int[var10][this.n];
-			   boolean var20 = true;
+      mapping=mappings[mode.getMapping()];
 
-			   int var3;
-			   for(var11 = 0; var11 < var10; ++var11) {
-				   var3 = this.mapping.getMux()[var11];
-				   int var12 = this.mapping.getSubmapFloors()[var3];
-				   Floor var13 = var4.floors[var12].decodeFloor(var1, var2);
-				   this.channelFloors[var11] = var13;
-				   this.noResidues[var11] = var13 == null;
-				   if(var13 != null) {
-					   var20 = false;
-				   }
-			   }
+      final int[] magnitudes=mapping.getMagnitudes();
+      final int[] angles=mapping.getAngles();
 
-			   if(!var20) {
-				   for(var11 = 0; var11 < var19.length; ++var11) {
-					   if(!this.noResidues[var19[var11]] || !this.noResidues[var21[var11]]) {
-						   this.noResidues[var19[var11]] = false;
-						   this.noResidues[var21[var11]] = false;
-					   }
-				   }
+      blockFlag=mode.getBlockFlag();
 
-				   int var24;
-				   for(var11 = 0; var11 < this.mapping.getSubmaps(); ++var11) {
-					   var3 = 0;
-					   boolean[] var22 = new boolean[var10];
+      final int blockSize0=iHeader.getBlockSize0();
+      final int blockSize1=iHeader.getBlockSize1();
 
-					   for(var24 = 0; var24 < var10; ++var24) {
-						   if(this.mapping.getMux()[var24] == var11) {
-							   var22[var3++] = this.noResidues[var24];
-						   }
-					   }
+      n=blockFlag?blockSize1:blockSize0;
 
-					   var24 = this.mapping.getSubmapResidues()[var11];
-					   var9[var24].decodeResidue(var1, var2, this.mode, var22, this.pcm);
-				   }
+      if(blockFlag) {
+         previousWindowFlag=source.getBit();
+         nextWindowFlag=source.getBit();
+      }
 
-				   for(var11 = this.mapping.getCouplingSteps() - 1; var11 >= 0; --var11) {
-					   float[] var16 = this.pcm[var19[var11]];
-					   float[] var23 = this.pcm[var21[var11]];
+      windowCenter=n/2;
 
-					   for(var24 = 0; var24 < var16.length; ++var24) {
-						   float var17 = var23[var24];
-						   float var15 = var16[var24];
-						   if(var17 > 0.0F) {
-							   var23[var24] = var15 > 0.0F?var15 - var17:var15 + var17;
-						   } else {
-							   var16[var24] = var15 > 0.0F?var15 + var17:var15 - var17;
-							   var23[var24] = var15;
-						   }
-					   }
-				   }
+      if(blockFlag && !previousWindowFlag) {
+         leftWindowStart=n/4-blockSize0/4;
+         leftWindowEnd=n/4+blockSize0/4;
+         leftN=blockSize0/2;
+      }
+      else {
+         leftWindowStart=0;
+         leftWindowEnd=n/2;
+         leftN=windowCenter;
+      }
 
-				   for(var11 = 0; var11 < var10; ++var11) {
-					   if(this.channelFloors[var11] != null) {
-						   this.channelFloors[var11].computeFloor(this.pcm[var11]);
-					   }
-				   }
+      if(blockFlag && !nextWindowFlag) {
+         rightWindowStart=n*3/4-blockSize0/4;
+         rightWindowEnd=n*3/4+blockSize0/4;
+         rightN=blockSize0/2;
+      }
+      else {
+         rightWindowStart=windowCenter;
+         rightWindowEnd=n;
+         rightN=n/2;
+      }
 
-				   for(var11 = 0; var11 < var10; ++var11) {
-					   (this.blockFlag?var5.mdct[1]:var5.mdct[0]).imdct(this.pcm[var11], this.window, this.pcmInt[var11]);
-				   }
+      window=getComputedWindow();//new double[n];
 
-			   }
-		   }
-	   } catch (VorbisFormatException e) {
-		   e.printStackTrace();
-	   }
-   }
+      channelFloors=new Floor[channels];
+      noResidues=new boolean[channels];
 
-	private float[] getComputedWindow() {
-		int var1 = (this.blockFlag?4:0) + (this.previousWindowFlag?2:0) + (this.nextWindowFlag?1:0);
-		float[] var2;
-		if((var2 = windows[var1]) == null) {
-			var2 = new float[this.n];
+      pcm=new float[channels][n];
+      pcmInt=new int[channels][n];
 
-			int var3;
-			float var4;
-			for(var3 = 0; var3 < this.leftN; ++var3) {
-				var4 = MathHelper.sin((float)((double)((var4 = MathHelper.sin((float)(((double)var3 + 0.5D) / (double)this.leftN * 3.1415927410125732D / 2.0D))) * var4) * 1.5707963705062866D));
-				var2[var3 + this.leftWindowStart] = var4;
-			}
+      boolean allFloorsEmpty=true;
 
-			for(var3 = this.leftWindowEnd; var3 < this.rightWindowStart; var2[var3++] = 1.0F) {
-				;
-			}
-
-			for(var3 = 0; var3 < this.rightWindowEnd; ++var3) {
-				var4 = MathHelper.sin((float)((double)((var4 = MathHelper.sin((float)(((double)(this.rightWindowEnd - var3) - 0.5D) / (double)this.rightWindowEnd * 3.1415927410125732D / 2.0D))) * var4) * 1.5707963705062866D));
-				var2[var3 + this.rightWindowStart] = var4;
-			}
-
-			windows[var1] = var2;
-		}
-
-		return var2;
-	}
-
-   protected final int getNumberOfSamples() {
-      return this.rightWindowStart - this.leftWindowStart;
-   }
-
-   protected final void getPcm(AudioPacket var1, byte[] var2) {
-      int var3 = this.pcm.length;
-
-      for(int var4 = 0; var4 < var3; ++var4) {
-         int var5 = 0;
-         int var6 = var1.rightWindowStart;
-         int[] var7 = var1.pcmInt[var4];
-         int[] var8 = this.pcmInt[var4];
-
-         int var9;
-         int var10;
-         for(var9 = this.leftWindowStart; var9 < this.leftWindowEnd; ++var9) {
-            if((var10 = var7[var6++] + var8[var9]) > 32767) {
-               var10 = 32767;
-            }
-
-            if(var10 < -32768) {
-               var10 = -32768;
-            }
-
-            var2[var5 + (var4 << 1) + 1] = (byte)var10;
-            var2[var5 + (var4 << 1)] = (byte)(var10 >> 8);
-            var5 += var3 << 1;
+      for(int i=0; i<channels; i++) {
+         int submapNumber=mapping.getMux()[i];
+         int floorNumber=mapping.getSubmapFloors()[submapNumber];
+         Floor decodedFloor=sHeader.getFloors()[floorNumber].decodeFloor(vorbis, source);
+         channelFloors[i]=decodedFloor;
+         noResidues[i]=decodedFloor==null;
+         if(decodedFloor!=null) {
+            allFloorsEmpty=false;
          }
+      }
 
-         var5 = (this.leftWindowEnd - this.leftWindowStart) * var3 << 1;
+      if(allFloorsEmpty) {
+         return;
+      }
 
-         for(var9 = this.leftWindowEnd; var9 < this.rightWindowStart; ++var9) {
-            if((var10 = var8[var9]) > 32767) {
-               var10 = 32767;
-            }
+      for(int i=0; i<magnitudes.length; i++) {
+         if(!noResidues[magnitudes[i]] ||
+            !noResidues[angles[i]]) {
 
-            if(var10 < -32768) {
-               var10 = -32768;
-            }
-
-            var2[var5 + (var4 << 1) + 1] = (byte)var10;
-            var2[var5 + (var4 << 1)] = (byte)(var10 >> 8);
-            var5 += var3 << 1;
+            noResidues[magnitudes[i]]=false;
+            noResidues[angles[i]]=false;
          }
+      }
+
+      Residue[] decodedResidues=new Residue[mapping.getSubmaps()];
+
+      for(int i=0; i<mapping.getSubmaps(); i++) {
+         int ch=0;
+         boolean[] doNotDecodeFlags=new boolean[channels];
+         for(int j=0; j<channels; j++) {
+            if(mapping.getMux()[j]==i) {
+               doNotDecodeFlags[ch++]=noResidues[j];
+            }
+         }
+         int residueNumber=mapping.getSubmapResidues()[i];
+         Residue residue=residues[residueNumber];
+
+         residue.decodeResidue(vorbis, source, mode, ch, doNotDecodeFlags, pcm);
+      }
+
+
+      for(int i=mapping.getCouplingSteps()-1; i>=0; i--) {
+         double newA=0, newM=0;
+         final float[] magnitudeVector=pcm[magnitudes[i]];
+         final float[] angleVector=pcm[angles[i]];
+         for(int j=0; j<magnitudeVector.length; j++) {
+            float a=angleVector[j];
+            float m=magnitudeVector[j];
+            if(a>0) {
+               //magnitudeVector[j]=m;
+               angleVector[j]=m>0?m-a:m+a;
+            }
+            else {
+               magnitudeVector[j]=m>0?m+a:m-a;
+               angleVector[j]=m;
+            }
+         }
+      }
+
+      for(int i=0; i<channels; i++) {
+         if(channelFloors[i]!=null) {
+            channelFloors[i].computeFloor(pcm[i]);
+         }
+      }
+
+      // perform an inverse mdct to all channels
+
+      for(int i=0; i<channels; i++) {
+         MdctFloat mdct=blockFlag?iHeader.getMdct1():iHeader.getMdct0();
+         mdct.imdct(pcm[i], window, pcmInt[i]);
       }
 
    }
 
+   private float[] getComputedWindow() {
+      int ix=(blockFlag?4:0)+(previousWindowFlag?2:0)+(nextWindowFlag?1:0);
+      float[] w=windows[ix];
+      if(w==null) {
+         w=new float[n];
+
+         for(int i=0;i<leftN;i++){
+	         float x=(float)((i+.5)/leftN*Math.PI/2.);
+	         x=(float)Math.sin(x);
+	         x*=x;
+	         x*=(float)Math.PI/2.;
+	         x=(float)Math.sin(x);
+	         w[i+leftWindowStart]=x;
+	      }
+
+         for(int i=leftWindowEnd; i<rightWindowStart; w[i++]=1.0f);
+
+	      for(int i=0;i<rightN;i++){
+	         float x=(float)((rightN-i-.5)/rightN*Math.PI/2.);
+	         x=(float)Math.sin(x);
+	         x*=x;
+	         x*=(float)Math.PI/2.;
+	         x=(float)Math.sin(x);
+	         w[i+rightWindowStart]=x;
+	      }
+
+         windows[ix]=w;
+      }
+      return w;
+   }
+
+   protected int getNumberOfSamples() {
+      return rightWindowStart-leftWindowStart;
+   }
+
+   protected int getPcm(final AudioPacket previousPacket, final int[][] buffer) {
+      int channels=pcm.length;
+      int val;
+
+      // copy left window flank and mix with right window flank from
+      // the previous audio packet
+      for(int i=0; i<channels; i++) {
+         int j1=0, j2=previousPacket.rightWindowStart;
+         final int[] ppcm=previousPacket.pcmInt[i];
+         final int[] tpcm=pcmInt[i];
+         final int[] target=buffer[i];
+
+         for(int j=leftWindowStart; j<leftWindowEnd; j++) {
+            val=ppcm[j2++]+tpcm[j];
+            if(val>32767) val=32767;
+            if(val<-32768) val=-32768;
+            target[j1++]=val;
+         }
+      }
+
+      // use System.arraycopy to copy the middle part (if any)
+      // of the window
+      if(leftWindowEnd+1<rightWindowStart) {
+         for(int i=0; i<channels; i++) {
+            System.arraycopy(pcmInt[i], leftWindowEnd, buffer[i], leftWindowEnd-leftWindowStart, rightWindowStart-leftWindowEnd);
+         }
+      }
+
+      return rightWindowStart-leftWindowStart;
+   }
+
+   protected void getPcm(final AudioPacket previousPacket, final byte[] buffer) {
+      int channels=pcm.length;
+      int val;
+
+      // copy left window flank and mix with right window flank from
+      // the previous audio packet
+      for(int i=0; i<channels; i++) {
+         int ix=0, j2=previousPacket.rightWindowStart;
+         final int[] ppcm=previousPacket.pcmInt[i];
+         final int[] tpcm=pcmInt[i];
+         for(int j=leftWindowStart; j<leftWindowEnd; j++) {
+            val=ppcm[j2++]+tpcm[j];
+            if(val>32767) val=32767;
+            if(val<-32768) val=-32768;
+            buffer[ix+(i*2)+1]=(byte)(val&0xff);
+            buffer[ix+(i*2)]=(byte)((val>>8)&0xff);
+            ix+=channels*2;
+         }
+
+         ix=(leftWindowEnd-leftWindowStart)*channels*2;
+         for(int j=leftWindowEnd; j<rightWindowStart; j++) {
+            val=tpcm[j];
+            if(val>32767) val=32767;
+            if(val<-32768) val=-32768;
+            buffer[ix+(i*2)+1]=(byte)(val&0xff);
+            buffer[ix+(i*2)]=(byte)((val>>8)&0xff);
+            ix+=channels*2;
+         }
+      }
+   }
+
+   protected float[] getWindow() {
+      return window;
+   }
+
+   protected int getLeftWindowStart() {
+      return leftWindowStart;
+   }
+
+   protected int getLeftWindowEnd() {
+      return leftWindowEnd;
+   }
+
+   protected int getRightWindowStart() {
+      return rightWindowStart;
+   }
+
+   protected int getRightWindowEnd() {
+      return rightWindowEnd;
+   }
+
+   public int[][] getPcm() {
+      return pcmInt;
+   }
+
+   public float[][] getFreqencyDomain() {
+      return pcm;
+   }
 }

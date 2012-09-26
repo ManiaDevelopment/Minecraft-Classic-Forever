@@ -1,128 +1,241 @@
+/*
+ * $ProjectName$
+ * $ProjectRevision$
+ * -----------------------------------------------------------
+ * $Id: VorbisStream.java,v 1.4 2003/04/10 19:49:04 jarnbjo Exp $
+ * -----------------------------------------------------------
+ *
+ * $Author: jarnbjo $
+ *
+ * Description:
+ *
+ * Copyright 2002-2003 Tor-Einar Jarnbjo
+ * -----------------------------------------------------------
+ *
+ * Change History
+ * -----------------------------------------------------------
+ * $Log: VorbisStream.java,v $
+ * Revision 1.4  2003/04/10 19:49:04  jarnbjo
+ * no message
+ *
+ * Revision 1.3  2003/03/31 00:20:16  jarnbjo
+ * no message
+ *
+ * Revision 1.2  2003/03/16 01:11:12  jarnbjo
+ * no message
+ *
+ *
+ */
+
 package de.jarnbjo.vorbis;
 
-import de.jarnbjo.ogg.LogicalOggStreamImpl;
-import de.jarnbjo.util.io.BitInputStream;
-import de.jarnbjo.vorbis.AudioPacket;
-import de.jarnbjo.vorbis.CommentHeader;
-import de.jarnbjo.vorbis.IdentificationHeader;
-import de.jarnbjo.vorbis.SetupHeader;
-import de.jarnbjo.vorbis.VorbisFormatException;
-import java.util.LinkedList;
+import java.io.*;
+import java.util.*;
 
-public final class VorbisStream {
+import de.jarnbjo.ogg.*;
+import de.jarnbjo.util.io.*;
 
-   private LogicalOggStreamImpl oggStream;
-   public IdentificationHeader identificationHeader;
+/**
+ */
+
+public class VorbisStream {
+
+   private LogicalOggStream oggStream;
+   private IdentificationHeader identificationHeader;
    private CommentHeader commentHeader;
-   SetupHeader setupHeader;
-   private AudioPacket lastAudioPacket;
+   private SetupHeader setupHeader;
+
+   private AudioPacket lastAudioPacket, nextAudioPacket;
+   private LinkedList audioPackets=new LinkedList();
    private byte[] currentPcm;
    private int currentPcmIndex;
    private int currentPcmLimit;
-   private Object streamLock;
-   private int pageCounter;
+
+   private static final int IDENTIFICATION_HEADER = 1;
+   private static final int COMMENT_HEADER = 3;
+   private static final int SETUP_HEADER = 5;
+
+   private int bitIndex=0;
+   private byte lastByte=(byte)0;
+   private boolean initialized=false;
+
+   private Object streamLock=new Object();
+   private int pageCounter=0;
+
+   private int currentBitRate=0;
+
    private long currentGranulePosition;
 
+   public static final int BIG_ENDIAN = 0;
+   public static final int LITTLE_ENDIAN = 1;
 
    public VorbisStream() {
-      new LinkedList();
-      this.streamLock = new Object();
-      this.pageCounter = 0;
    }
 
-   public VorbisStream(LogicalOggStreamImpl var1) {
-	   try
-	   {
-		   new LinkedList();
-		   this.streamLock = new Object();
-		   this.pageCounter = 0;
-		   this.oggStream = var1;
+   public VorbisStream(LogicalOggStream oggStream) throws VorbisFormatException, IOException {
+      this.oggStream=oggStream;
 
-		   for(int var2 = 0; var2 < 3; ++var2) {
-			   BitInputStream var3;
-			   switch((var3 = new BitInputStream(var1.getNextOggPacket())).getInt(8)) {
-				   case 1:
-					   this.identificationHeader = new IdentificationHeader(var3);
-				   case 2:
-				   case 4:
-				   default:
-					   break;
-				   case 3:
-					   this.commentHeader = new CommentHeader(var3);
-					   break;
-				   case 5:
-					   this.setupHeader = new SetupHeader(this, var3);
-			   }
-		   }
-
-		   if(this.identificationHeader == null) {
-			   throw new VorbisFormatException("The file has no identification header.");
-		   } else if(this.commentHeader == null) {
-			   throw new VorbisFormatException("The file has no commentHeader.");
-		   } else if(this.setupHeader == null) {
-			   throw new VorbisFormatException("The file has no setup header.");
-		   } else {
-			   IdentificationHeader var5 = this.identificationHeader;
-			   var5 = this.identificationHeader;
-			   this.currentPcm = new byte[this.identificationHeader.channels * this.identificationHeader.blockSize1 << 1];
-		   }
-	   } catch (VorbisFormatException e) {
-		   e.printStackTrace();
-	   }
-   }
-
-   public final int readPcm(byte[] var1, int var2, int var3) {
-      Object var4 = this.streamLock;
-      synchronized(this.streamLock) {
-         if(this.lastAudioPacket == null) {
-            this.lastAudioPacket = this.getNextAudioPacket();
+      for(int i=0; i<3; i++) {
+         BitInputStream source=new ByteArrayBitInputStream(oggStream.getNextOggPacket());
+         int headerType=source.getInt(8);
+         switch(headerType) {
+         case IDENTIFICATION_HEADER:
+            identificationHeader=new IdentificationHeader(source);
+            break;
+         case COMMENT_HEADER:
+            commentHeader=new CommentHeader(source);
+            break;
+         case SETUP_HEADER:
+            setupHeader=new SetupHeader(this, source);
+            break;
          }
+      }
 
-         if(this.currentPcm == null || this.currentPcmIndex >= this.currentPcmLimit) {
-            AudioPacket var5 = this.getNextAudioPacket();
+      if(identificationHeader==null) {
+         throw new VorbisFormatException("The file has no identification header.");
+      }
 
+      if(commentHeader==null) {
+         throw new VorbisFormatException("The file has no commentHeader.");
+      }
+
+      if(setupHeader==null) {
+         throw new VorbisFormatException("The file has no setup header.");
+      }
+
+      //currentPcm=new int[identificationHeader.getChannels()][16384];
+      currentPcm=new byte[identificationHeader.getChannels()*identificationHeader.getBlockSize1()*2];
+      //new BufferThread().start();
+   }
+
+   public IdentificationHeader getIdentificationHeader() {
+      return identificationHeader;
+   }
+
+   public CommentHeader getCommentHeader() {
+      return commentHeader;
+   }
+
+   protected SetupHeader getSetupHeader() {
+      return setupHeader;
+   }
+
+   public boolean isOpen() {
+      return oggStream.isOpen();
+   }
+
+   public void close() throws IOException {
+      oggStream.close();
+   }
+
+
+   public int readPcm(byte[] buffer, int offset, int length) throws IOException {
+      synchronized (streamLock) {
+         final int channels=identificationHeader.getChannels();
+
+         if(lastAudioPacket==null) {
+            lastAudioPacket=getNextAudioPacket();
+         }
+         if(currentPcm==null || currentPcmIndex>=currentPcmLimit) {
+            AudioPacket ap=getNextAudioPacket();
             try {
-               var5.getPcm(this.lastAudioPacket, this.currentPcm);
-               int var10001 = var5.getNumberOfSamples();
-               IdentificationHeader var6 = this.identificationHeader;
-               this.currentPcmLimit = var10001 * this.identificationHeader.channels << 1;
-            } catch (ArrayIndexOutOfBoundsException var8) {
+               ap.getPcm(lastAudioPacket, currentPcm);
+               currentPcmLimit=ap.getNumberOfSamples()*identificationHeader.getChannels()*2;
+            }
+            catch(ArrayIndexOutOfBoundsException e) {
                return 0;
             }
-
-            this.currentPcmIndex = 0;
-            this.lastAudioPacket = var5;
+            currentPcmIndex=0;
+            lastAudioPacket=ap;
          }
-
-         int var10 = 0;
-         boolean var12 = false;
-         int var7 = 0;
-
-         int var11;
-         for(var11 = this.currentPcmIndex; var11 < this.currentPcmLimit && var7 < var3; ++var11) {
-            var1[var2 + var7++] = this.currentPcm[var11];
-            ++var10;
+         int written=0;
+         int i=0;
+         int arrIx=0;
+         for(i=currentPcmIndex; i<currentPcmLimit && arrIx<length; i++) {
+            buffer[offset+arrIx++]=currentPcm[i];
+            written++;
          }
-
-         this.currentPcmIndex = var11;
-         return var10;
+         currentPcmIndex=i;
+         return written;
       }
    }
 
-   private AudioPacket getNextAudioPacket() {
-      ++this.pageCounter;
-      byte[] var1 = this.oggStream.getNextOggPacket();
-      AudioPacket var2 = null;
 
-      while(var2 == null) {
+   private AudioPacket getNextAudioPacket() throws VorbisFormatException, IOException {
+      pageCounter++;
+      byte[] data=oggStream.getNextOggPacket();
+      AudioPacket res=null;
+      while(res==null) {
          try {
-            var2 = new AudioPacket(this, new BitInputStream(var1));
-         } catch (ArrayIndexOutOfBoundsException var3) {
-            ;
+            res=new AudioPacket(this, new ByteArrayBitInputStream(data));
+         }
+         catch(ArrayIndexOutOfBoundsException e) {
+            // ignore and continue with next packet
          }
       }
-
-      this.currentGranulePosition += (long)var2.getNumberOfSamples();
-      return var2;
+      currentGranulePosition+=res.getNumberOfSamples();
+      currentBitRate=data.length*8*identificationHeader.getSampleRate()/res.getNumberOfSamples();
+      return res;
    }
+
+   public long getCurrentGranulePosition() {
+      return currentGranulePosition;
+   }
+
+   public int getCurrentBitRate() {
+      return currentBitRate;
+   }
+
+   public byte[] processPacket(byte[] packet) throws VorbisFormatException, IOException {
+      if(packet.length==0) {
+         throw new VorbisFormatException("Cannot decode a vorbis packet with length = 0");
+      }
+      if(((int)packet[0]&1)==1) {
+         // header packet
+         BitInputStream source=new ByteArrayBitInputStream(packet);
+         switch(source.getInt(8)) {
+         case IDENTIFICATION_HEADER:
+            identificationHeader=new IdentificationHeader(source);
+            break;
+         case COMMENT_HEADER:
+            commentHeader=new CommentHeader(source);
+            break;
+         case SETUP_HEADER:
+            setupHeader=new SetupHeader(this, source);
+            break;
+         }
+         return null;
+      }
+      else {
+         // audio packet
+         if(identificationHeader==null ||
+            commentHeader==null ||
+            setupHeader==null) {
+
+            throw new VorbisFormatException("Cannot decode audio packet before all three header packets have been decoded.");
+         }
+
+         AudioPacket ap=new AudioPacket(this, new ByteArrayBitInputStream(packet));
+         currentGranulePosition+=ap.getNumberOfSamples();
+
+         if(lastAudioPacket==null) {
+            lastAudioPacket=ap;
+            return null;
+         }
+
+         byte[] res=new byte[identificationHeader.getChannels()*ap.getNumberOfSamples()*2];
+
+         try {
+            ap.getPcm(lastAudioPacket, res);
+         }
+         catch(IndexOutOfBoundsException e) {
+            java.util.Arrays.fill(res, (byte)0);
+         }
+
+         lastAudioPacket=ap;
+
+         return res;
+      }
+   }
+
 }

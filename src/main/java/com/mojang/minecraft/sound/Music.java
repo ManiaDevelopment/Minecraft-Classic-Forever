@@ -1,11 +1,12 @@
 package com.mojang.minecraft.sound;
 
-import com.mojang.minecraft.sound.Audio;
-import com.mojang.minecraft.sound.MusicPlayThread;
-import com.mojang.minecraft.sound.SoundPlayer;
 import de.jarnbjo.ogg.LogicalOggStreamImpl;
+import de.jarnbjo.ogg.OggFormatException;
 import de.jarnbjo.ogg.OnDemandUrlStream;
+import de.jarnbjo.vorbis.VorbisFormatException;
 import de.jarnbjo.vorbis.VorbisStream;
+
+import java.io.IOException;
 import java.net.URL;
 import java.nio.ByteBuffer;
 
@@ -23,9 +24,18 @@ public final class Music implements Audio {
 
    public Music(SoundPlayer var1, URL var2) {
       this.player = var1;
-      LogicalOggStreamImpl var3 = (LogicalOggStreamImpl)(new OnDemandUrlStream(var2)).logicalStreams.values().iterator().next();
-      this.stream = new VorbisStream(var3);
-      (new MusicPlayThread(this)).start();
+	   try
+	   {
+		   LogicalOggStreamImpl var3 = (LogicalOggStreamImpl)(new OnDemandUrlStream(var2)).getLogicalStreams().iterator().next();
+		   this.stream = new VorbisStream(var3);
+	   } catch (VorbisFormatException e) {
+		   e.printStackTrace();
+	   } catch (OggFormatException e) {
+		   e.printStackTrace();
+	   } catch (IOException e) {
+		   e.printStackTrace();
+	   }
+	   (new MusicPlayThread(this)).start();
    }
 
    public final boolean play(int[] var1, int[] var2, int var3) {

@@ -1,77 +1,138 @@
+/*
+ * $ProjectName$
+ * $ProjectRevision$
+ * -----------------------------------------------------------
+ * $Id: HuffmanNode.java,v 1.2 2003/04/10 19:48:31 jarnbjo Exp $
+ * -----------------------------------------------------------
+ *
+ * $Author: jarnbjo $
+ *
+ * Description:
+ *
+ * Copyright 2002-2003 Tor-Einar Jarnbjo
+ * -----------------------------------------------------------
+ *
+ * Change History
+ * -----------------------------------------------------------
+ * $Log: HuffmanNode.java,v $
+ * Revision 1.2  2003/04/10 19:48:31  jarnbjo
+ * no message
+ *
+ */
+ 
 package de.jarnbjo.util.io;
 
+import java.io.IOException;
+import de.jarnbjo.util.io.BitInputStream;
 
-public final class HuffmanNode {
+/**
+ *  Representation of a node in a Huffman tree, used to read
+ *  Huffman compressed codewords from e.g. a Vorbis stream.
+ */
 
-   private int depth;
-   protected HuffmanNode o0;
-   protected HuffmanNode o1;
+final public class HuffmanNode {
+
+   private HuffmanNode parent;
+   private int depth=0;
+   protected HuffmanNode o0, o1;
    protected Integer value;
-   private boolean full;
+   private boolean full=false;
 
+	/**
+	 *   creates a new Huffman tree root node
+	 */ 
 
    public HuffmanNode() {
-      this((HuffmanNode)null);
+      this(null);
    }
 
-   private HuffmanNode(HuffmanNode var1) {
-      this.depth = 0;
-      this.full = false;
-      if(var1 != null) {
-         this.depth = var1.depth + 1;
+   protected HuffmanNode(HuffmanNode parent) {
+      this.parent=parent;
+      if(parent!=null) {
+         depth=parent.getDepth()+1;
       }
-
    }
 
-   private HuffmanNode(HuffmanNode var1, int var2) {
-      this(var1);
-      this.value = new Integer(var2);
-      this.full = true;
+   protected HuffmanNode(HuffmanNode parent, int value) {
+      this(parent);
+      this.value=new Integer(value);
+      full=true;
+   }
+
+   protected int read(BitInputStream bis) throws IOException {
+      HuffmanNode iter=this;
+      while(iter.value==null) {
+         iter=bis.getBit()?iter.o1:iter.o0;
+      }
+      return iter.value.intValue();
+   }
+
+   protected HuffmanNode get0() {
+      return o0==null?set0(new HuffmanNode(this)):o0;
+   }
+
+   protected HuffmanNode get1() {
+      return o1==null?set1(new HuffmanNode(this)):o1;
+   }
+
+   protected Integer getValue() {
+      return value;
+   }
+
+   private HuffmanNode getParent() {
+      return parent;
+   }
+
+   protected int getDepth() {
+      return depth;
    }
 
    private boolean isFull() {
-      return this.full?true:(this.full = this.o0 != null && this.o0.isFull() && this.o1 != null && this.o1.isFull());
+      return full?true:(full=o0!=null&&o0.isFull()&&o1!=null&&o1.isFull());
    }
 
-   public final boolean setNewValue(int var1, int var2) {
-      if(this.isFull()) {
+   private HuffmanNode set0(HuffmanNode value) {
+      return o0=value;
+   }
+
+   private HuffmanNode set1(HuffmanNode value) {
+      return o1=value;
+   }
+
+   private void setValue(Integer value) {
+      full=true;
+      this.value=value;
+   }
+
+	/**
+	 *  creates a new tree node at the first free location at the given
+	 *  depth, and assigns the value to it
+	 *
+	 *  @param depth the tree depth of the new node (codeword length in bits)
+	 *  @param value the node's new value
+    */
+    
+   public boolean setNewValue(int depth, int value) {
+      if(isFull()) {
          return false;
-      } else {
-         HuffmanNode var3;
-         if(var1 == 1) {
-            if(this.o0 == null) {
-               var3 = new HuffmanNode(this, var2);
-               this.o0 = var3;
-               return true;
-            } else if(this.o1 == null) {
-               var3 = new HuffmanNode(this, var2);
-               this.o1 = var3;
-               return true;
-            } else {
-               return false;
-            }
-         } else {
-            HuffmanNode var10000;
-            if(this.o0 == null) {
-               var3 = new HuffmanNode(this);
-               var10000 = this.o0 = var3;
-            } else {
-               var10000 = this.o0;
-            }
-
-            if(var10000.setNewValue(var1 - 1, var2)) {
-               return true;
-            } else {
-               if(this.o1 == null) {
-                  var3 = new HuffmanNode(this);
-                  var10000 = this.o1 = var3;
-               } else {
-                  var10000 = this.o1;
-               }
-
-               return var10000.setNewValue(var1 - 1, var2);
-            }
+      }
+      if(depth==1) {
+         if(o0==null) {
+            set0(new HuffmanNode(this, value));
+            return true;
          }
+         else if(o1==null) {
+            set1(new HuffmanNode(this, value));
+            return true;
+         }
+         else {
+            return false;
+         }
+      }
+      else {
+         return get0().setNewValue(depth-1, value)?
+            true:
+            get1().setNewValue(depth-1, value);
       }
    }
 }

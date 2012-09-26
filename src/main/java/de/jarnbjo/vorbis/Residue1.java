@@ -2,7 +2,7 @@
  * $ProjectName$
  * $ProjectRevision$
  * -----------------------------------------------------------
- * $Id: Residue0.java,v 1.2 2003/03/16 01:11:12 jarnbjo Exp $
+ * $Id: Residue1.java,v 1.2 2003/03/16 01:11:12 jarnbjo Exp $
  * -----------------------------------------------------------
  *
  * $Author: jarnbjo $
@@ -14,7 +14,7 @@
  *
  * Change History
  * -----------------------------------------------------------
- * $Log: Residue0.java,v $
+ * $Log: Residue1.java,v $
  * Revision 1.2  2003/03/16 01:11:12  jarnbjo
  * no message
  *
@@ -28,18 +28,20 @@ import java.util.*;
 
 import de.jarnbjo.util.io.BitInputStream;
 
-class Residue0 extends Residue {
+class Residue1 extends Residue {
 
-   protected Residue0(BitInputStream source, SetupHeader header) throws VorbisFormatException, IOException {
+   protected Residue1(BitInputStream source, SetupHeader header) throws VorbisFormatException, IOException {
       super(source, header);
    }
 
    protected int getType() {
-      return 0;
+      return 1;
    }
 
    protected void decodeResidue(VorbisStream vorbis, BitInputStream source, Mode mode, int ch, boolean[] doNotDecodeFlags, float[][] vectors) throws VorbisFormatException, IOException {
       /** @todo implement */
       throw new UnsupportedOperationException();
    }
+
+
 }
