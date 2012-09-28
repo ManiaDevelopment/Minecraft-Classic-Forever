@@ -1,14 +1,13 @@
 package com.mojang.minecraft.sound;
 
+public class SoundData
+{
+	public SoundData(short[] data, float length)
+	{
+		this.data = data;
+		this.length = length;
+	}
 
-public final class SoundData {
-
-   public final short[] data;
-   public final float length;
-
-
-   public SoundData(short[] var1, float var2) {
-      this.data = var1;
-      this.length = var2;
-   }
+	public short[] data;
+	public float length;
 }

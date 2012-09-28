@@ -17,8 +17,8 @@ public final class SlabBlock extends Block {
 
    }
 
-   protected final int getTextureId(int var1) {
-      return var1 <= 1?6:5;
+   protected final int getTextureId(int texture) {
+      return texture <= 1?6:5;
    }
 
    public final boolean isSolid() {
@@ -31,14 +31,14 @@ public final class SlabBlock extends Block {
       }
    }
 
-   public final void onAdded(Level var1, int var2, int var3, int var4) {
+   public final void onAdded(Level level, int x, int y, int z) {
       if(this != Block.SLAB) {
-         super.onAdded(var1, var2, var3, var4);
+         super.onAdded(level, x, y, z);
       }
 
-      if(var1.getTile(var2, var3 - 1, var4) == SLAB.id) {
-         var1.setTile(var2, var3, var4, 0);
-         var1.setTile(var2, var3 - 1, var4, Block.DOUBLE_SLAB.id);
+      if(level.getTile(x, y - 1, z) == SLAB.id) {
+         level.setTile(x, y, z, 0);
+         level.setTile(x, y - 1, z, Block.DOUBLE_SLAB.id);
       }
 
    }
@@ -51,11 +51,11 @@ public final class SlabBlock extends Block {
       return this.doubleSlab;
    }
 
-   public final boolean canRenderSide(Level var1, int var2, int var3, int var4, int var5) {
+   public final boolean canRenderSide(Level level, int x, int y, int z, int side) {
       if(this != Block.SLAB) {
-         super.canRenderSide(var1, var2, var3, var4, var5);
+         super.canRenderSide(level, x, y, z, side);
       }
 
-      return var5 == 1?true:(!super.canRenderSide(var1, var2, var3, var4, var5)?false:(var5 == 0?true:var1.getTile(var2, var3, var4) != this.id));
+      return side == 1?true:(!super.canRenderSide(level, x, y, z, side)?false:(side == 0?true: level.getTile(x, y, z) != this.id));
    }
 }

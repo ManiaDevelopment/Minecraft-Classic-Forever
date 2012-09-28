@@ -1,23 +1,27 @@
 package com.mojang.minecraft.sound;
 
 import com.mojang.minecraft.Entity;
-import com.mojang.minecraft.sound.BaseSoundPos;
 
-public final class EntitySoundPos extends BaseSoundPos {
+public class EntitySoundPos extends BaseSoundPos
+{
+	public EntitySoundPos(Entity source, Entity listener)
+	{
+		super(listener);
 
-   private Entity source;
+		this.source = source;
+	}
 
+	@Override
+	public float getRotationDiff()
+	{
+		return super.getRotationDiff(source.x, source.z);
+	}
 
-   public EntitySoundPos(Entity var1, Entity var2) {
-      super(var2);
-      this.source = var1;
-   }
+	@Override
+	public float getDistanceSq()
+	{
+		return super.getDistanceSq(source.x, source.y, source.z);
+	}
 
-   public final float getRotationDiff() {
-      return super.getRotationDiff(this.source.x, this.source.z);
-   }
-
-   public final float getDistanceSq() {
-      return super.getDistanceSq(this.source.x, this.source.y, this.source.z);
-   }
+	private Entity source;
 }

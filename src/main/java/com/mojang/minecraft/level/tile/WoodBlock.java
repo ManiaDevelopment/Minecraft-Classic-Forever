@@ -17,7 +17,7 @@ public final class WoodBlock extends Block {
       return Block.WOOD.id;
    }
 
-   protected final int getTextureId(int var1) {
-      return var1 == 1?21:(var1 == 0?21:20);
+   protected final int getTextureId(int texture) {
+      return texture == 1?21:(texture == 0?21:20);
    }
 }

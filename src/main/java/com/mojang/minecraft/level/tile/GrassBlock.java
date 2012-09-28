@@ -12,21 +12,21 @@ public final class GrassBlock extends Block {
       this.setPhysics(true);
    }
 
-   protected final int getTextureId(int var1) {
-      return var1 == 1?0:(var1 == 0?2:3);
+   protected final int getTextureId(int texture) {
+      return texture == 1?0:(texture == 0?2:3);
    }
 
-   public final void update(Level var1, int var2, int var3, int var4, Random var5) {
-      if(var5.nextInt(4) == 0) {
-         if(!var1.isLit(var2, var3, var4)) {
-            var1.setTile(var2, var3, var4, Block.DIRT.id);
+   public final void update(Level level, int x, int y, int z, Random rand) {
+      if(rand.nextInt(4) == 0) {
+         if(!level.isLit(x, y, z)) {
+            level.setTile(x, y, z, Block.DIRT.id);
          } else {
             for(int var9 = 0; var9 < 4; ++var9) {
-               int var6 = var2 + var5.nextInt(3) - 1;
-               int var7 = var3 + var5.nextInt(5) - 3;
-               int var8 = var4 + var5.nextInt(3) - 1;
-               if(var1.getTile(var6, var7, var8) == Block.DIRT.id && var1.isLit(var6, var7, var8)) {
-                  var1.setTile(var6, var7, var8, Block.GRASS.id);
+               int var6 = x + rand.nextInt(3) - 1;
+               int var7 = y + rand.nextInt(5) - 3;
+               int var8 = z + rand.nextInt(3) - 1;
+               if(level.getTile(var6, var7, var8) == Block.DIRT.id && level.isLit(var6, var7, var8)) {
+                  level.setTile(var6, var7, var8, Block.GRASS.id);
                }
             }
 

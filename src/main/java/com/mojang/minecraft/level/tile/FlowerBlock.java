@@ -16,11 +16,11 @@ public class FlowerBlock extends Block {
       this.setBounds(0.5F - var3, 0.0F, 0.5F - var3, var3 + 0.5F, var3 * 3.0F, var3 + 0.5F);
    }
 
-   public void update(Level var1, int var2, int var3, int var4, Random var5) {
-      if(!var1.growTrees) {
-         int var6 = var1.getTile(var2, var3 - 1, var4);
-         if(!var1.isLit(var2, var3, var4) || var6 != Block.DIRT.id && var6 != Block.GRASS.id) {
-            var1.setTile(var2, var3, var4, 0);
+   public void update(Level level, int x, int y, int z, Random rand) {
+      if(!level.growTrees) {
+         int var6 = level.getTile(x, y - 1, z);
+         if(!level.isLit(x, y, z) || var6 != Block.DIRT.id && var6 != Block.GRASS.id) {
+            level.setTile(x, y, z, 0);
          }
 
       }
@@ -81,8 +81,8 @@ public class FlowerBlock extends Block {
       return true;
    }
 
-   public final void renderFullbright(ShapeRenderer var1) {
-      var1.color(1.0F, 1.0F, 1.0F);
-      this.render(var1, (float)-2, 0.0F, 0.0F);
+   public final void renderFullbright(ShapeRenderer shapeRenderer) {
+      shapeRenderer.color(1.0F, 1.0F, 1.0F);
+      this.render(shapeRenderer, (float)-2, 0.0F, 0.0F);
    }
 }

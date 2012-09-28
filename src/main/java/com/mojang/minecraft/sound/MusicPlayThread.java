@@ -1,10 +1,10 @@
 package com.mojang.minecraft.sound;
 
-import com.mojang.minecraft.sound.Music;
-import de.jarnbjo.ogg.EndOfOggStreamException;
 import de.jarnbjo.vorbis.VorbisStream;
+
 import java.nio.ByteBuffer;
 
+// TODO.
 final class MusicPlayThread extends Thread {
 
    // $FF: synthetic field

@@ -1,7 +1,6 @@
 package com.mojang.minecraft.level.tile;
 
 import com.mojang.minecraft.level.Level;
-import com.mojang.minecraft.level.tile.Block;
 
 public final class GlassBlock extends Block {
 
@@ -16,9 +15,9 @@ public final class GlassBlock extends Block {
       return false;
    }
 
-   public final boolean canRenderSide(Level var1, int var2, int var3, int var4, int var5) {
-      int var6 = var1.getTile(var2, var3, var4);
-      return !this.showNeighborSides && var6 == this.id?false:super.canRenderSide(var1, var2, var3, var4, var5);
+   public final boolean canRenderSide(Level level, int x, int y, int z, int side) {
+      int var6 = level.getTile(x, y, z);
+      return !this.showNeighborSides && var6 == this.id?false:super.canRenderSide(level, x, y, z, side);
    }
 
    public final boolean isOpaque() {

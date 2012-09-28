@@ -38,39 +38,39 @@ public class LiquidBlock extends Block {
       return false;
    }
 
-   public final void onPlace(Level var1, int var2, int var3, int var4) {
-      var1.addToTickNextTick(var2, var3, var4, this.movingId);
+   public final void onPlace(Level level, int x, int y, int z) {
+      level.addToTickNextTick(x, y, z, this.movingId);
    }
 
-   public void update(Level var1, int var2, int var3, int var4, Random var5) {
+   public void update(Level level, int x, int y, int z, Random rand) {
       boolean var7 = false;
-      var4 = var4;
-      var3 = var3;
-      var2 = var2;
-      var1 = var1;
+      z = z;
+      y = y;
+      x = x;
+      level = level;
       boolean var8 = false;
 
       boolean var6;
       do {
-         --var3;
-         if(var1.getTile(var2, var3, var4) != 0 || !this.canFlow(var1, var2, var3, var4)) {
+         --y;
+         if(level.getTile(x, y, z) != 0 || !this.canFlow(level, x, y, z)) {
             break;
          }
 
-         if(var6 = var1.setTile(var2, var3, var4, this.movingId)) {
+         if(var6 = level.setTile(x, y, z, this.movingId)) {
             var8 = true;
          }
       } while(var6 && this.type != LiquidType.LAVA);
 
-      ++var3;
+      ++y;
       if(this.type == LiquidType.WATER || !var8) {
-         var8 = var8 | this.flow(var1, var2 - 1, var3, var4) | this.flow(var1, var2 + 1, var3, var4) | this.flow(var1, var2, var3, var4 - 1) | this.flow(var1, var2, var3, var4 + 1);
+         var8 = var8 | this.flow(level, x - 1, y, z) | this.flow(level, x + 1, y, z) | this.flow(level, x, y, z - 1) | this.flow(level, x, y, z + 1);
       }
 
       if(!var8) {
-         var1.setTileNoUpdate(var2, var3, var4, this.stillId);
+         level.setTileNoUpdate(x, y, z, this.stillId);
       } else {
-         var1.addToTickNextTick(var2, var3, var4, this.movingId);
+         level.addToTickNextTick(x, y, z, this.movingId);
       }
 
    }
@@ -105,18 +105,18 @@ public class LiquidBlock extends Block {
       return false;
    }
 
-   protected final float getBrightness(Level var1, int var2, int var3, int var4) {
-      return this.type == LiquidType.LAVA?100.0F:var1.getBrightness(var2, var3, var4);
+   protected final float getBrightness(Level level, int x, int y, int z) {
+      return this.type == LiquidType.LAVA?100.0F: level.getBrightness(x, y, z);
    }
 
-   public final boolean canRenderSide(Level var1, int var2, int var3, int var4, int var5) {
+   public final boolean canRenderSide(Level level, int x, int y, int z, int side) {
       int var6;
-      return var2 >= 0 && var3 >= 0 && var4 >= 0 && var2 < var1.width && var4 < var1.height?((var6 = var1.getTile(var2, var3, var4)) != this.movingId && var6 != this.stillId?(var5 == 1 && (var1.getTile(var2 - 1, var3, var4) == 0 || var1.getTile(var2 + 1, var3, var4) == 0 || var1.getTile(var2, var3, var4 - 1) == 0 || var1.getTile(var2, var3, var4 + 1) == 0)?true:super.canRenderSide(var1, var2, var3, var4, var5)):false):false;
+      return x >= 0 && y >= 0 && z >= 0 && x < level.width && z < level.height?((var6 = level.getTile(x, y, z)) != this.movingId && var6 != this.stillId?(side == 1 && (level.getTile(x - 1, y, z) == 0 || level.getTile(x + 1, y, z) == 0 || level.getTile(x, y, z - 1) == 0 || level.getTile(x, y, z + 1) == 0)?true:super.canRenderSide(level, x, y, z, side)):false):false;
    }
 
-   public final void renderInside(ShapeRenderer var1, int var2, int var3, int var4, int var5) {
-      super.renderInside(var1, var2, var3, var4, var5);
-      super.renderSide(var1, var2, var3, var4, var5);
+   public final void renderInside(ShapeRenderer shapeRenderer, int x, int y, int z, int side) {
+      super.renderInside(shapeRenderer, x, y, z, side);
+      super.renderSide(shapeRenderer, x, y, z, side);
    }
 
    public final boolean isOpaque() {

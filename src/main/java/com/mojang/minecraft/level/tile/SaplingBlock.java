@@ -13,18 +13,18 @@ public final class SaplingBlock extends FlowerBlock {
       this.setBounds(0.5F - var3, 0.0F, 0.5F - var3, var3 + 0.5F, var3 * 2.0F, var3 + 0.5F);
    }
 
-   public final void update(Level var1, int var2, int var3, int var4, Random var5) {
-      int var6 = var1.getTile(var2, var3 - 1, var4);
-      if(var1.isLit(var2, var3, var4) && (var6 == Block.DIRT.id || var6 == Block.GRASS.id)) {
-         if(var5.nextInt(5) == 0) {
-            var1.setTileNoUpdate(var2, var3, var4, 0);
-            if(!var1.maybeGrowTree(var2, var3, var4)) {
-               var1.setTileNoUpdate(var2, var3, var4, this.id);
+   public final void update(Level level, int x, int y, int z, Random rand) {
+      int var6 = level.getTile(x, y - 1, z);
+      if(level.isLit(x, y, z) && (var6 == Block.DIRT.id || var6 == Block.GRASS.id)) {
+         if(rand.nextInt(5) == 0) {
+            level.setTileNoUpdate(x, y, z, 0);
+            if(!level.maybeGrowTree(x, y, z)) {
+               level.setTileNoUpdate(x, y, z, this.id);
             }
          }
 
       } else {
-         var1.setTile(var2, var3, var4, 0);
+         level.setTile(x, y, z, 0);
       }
    }
 }

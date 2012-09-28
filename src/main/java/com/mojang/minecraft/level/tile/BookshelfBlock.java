@@ -8,8 +8,8 @@ public final class BookshelfBlock extends Block {
       super(47, 35);
    }
 
-   protected final int getTextureId(int var1) {
-      return var1 <= 1?4:this.textureId;
+   protected final int getTextureId(int texture) {
+      return texture <= 1?4:this.textureId;
    }
 
    public final int getDropCount() {

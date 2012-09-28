@@ -9,7 +9,7 @@ public final class MetalBlock extends Block {
       this.textureId = var2;
    }
 
-   protected final int getTextureId(int var1) {
-      return var1 == 1?this.textureId - 16:(var1 == 0?this.textureId + 16:this.textureId);
+   protected final int getTextureId(int texture) {
+      return texture == 1?this.textureId - 16:(texture == 0?this.textureId + 16:this.textureId);
    }
 }

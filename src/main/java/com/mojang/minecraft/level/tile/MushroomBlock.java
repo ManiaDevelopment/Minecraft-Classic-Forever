@@ -13,10 +13,10 @@ public final class MushroomBlock extends FlowerBlock {
       this.setBounds(0.5F - var3, 0.0F, 0.5F - var3, var3 + 0.5F, var3 * 2.0F, var3 + 0.5F);
    }
 
-   public final void update(Level var1, int var2, int var3, int var4, Random var5) {
-      int var6 = var1.getTile(var2, var3 - 1, var4);
-      if(var1.isLit(var2, var3, var4) || var6 != Block.STONE.id && var6 != Block.GRAVEL.id && var6 != Block.COBBLESTONE.id) {
-         var1.setTile(var2, var3, var4, 0);
+   public final void update(Level level, int x, int y, int z, Random rand) {
+      int var6 = level.getTile(x, y - 1, z);
+      if(level.isLit(x, y, z) || var6 != Block.STONE.id && var6 != Block.GRAVEL.id && var6 != Block.COBBLESTONE.id) {
+         level.setTile(x, y, z, 0);
       }
 
    }

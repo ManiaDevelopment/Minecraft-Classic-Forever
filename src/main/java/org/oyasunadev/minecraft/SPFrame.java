@@ -15,6 +15,14 @@ public final class SPFrame extends JFrame
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLayout(new BorderLayout());
+
+		int width = Toolkit.getDefaultToolkit().getScreenSize().width;
+		int height = Toolkit.getDefaultToolkit().getScreenSize().height;
+
+		if(getWidth() == width && getHeight() == height)
+		{
+			setUndecorated(true);
+		}
 	}
 
 	public void startMinecraft()
