@@ -1,8 +1,6 @@
 package com.mojang.minecraft.mob;
 
 import com.mojang.minecraft.level.Level;
-import com.mojang.minecraft.mob.Mob;
-import com.mojang.minecraft.mob.Skeleton;
 import com.mojang.minecraft.mob.ai.BasicAttackAI;
 
 final class Skeleton$1 extends BasicAttackAI {

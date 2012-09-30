@@ -1,8 +1,6 @@
 package com.mojang.minecraft.level;
 
 import com.mojang.minecraft.Entity;
-import com.mojang.minecraft.level.BlockMap$Slot;
-import com.mojang.minecraft.level.SyntheticClass;
 import com.mojang.minecraft.model.Vec3D;
 import com.mojang.minecraft.phys.AABB;
 import com.mojang.minecraft.render.Frustrum;

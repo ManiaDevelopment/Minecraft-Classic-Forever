@@ -1,7 +1,6 @@
 package com.mojang.minecraft.mob;
 
 import com.mojang.minecraft.level.Level;
-import com.mojang.minecraft.mob.Mob;
 import com.mojang.minecraft.model.HumanoidModel;
 import com.mojang.minecraft.model.Model;
 import com.mojang.minecraft.render.TextureManager;

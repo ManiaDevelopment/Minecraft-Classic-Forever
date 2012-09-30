@@ -6,6 +6,7 @@ import com.mojang.minecraft.render.TextureManager;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import javax.imageio.ImageIO;
+
 import org.lwjgl.opengl.GL11;
 
 public final class FontRenderer {

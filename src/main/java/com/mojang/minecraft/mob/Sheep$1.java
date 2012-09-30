@@ -1,7 +1,6 @@
 package com.mojang.minecraft.mob;
 
 import com.mojang.minecraft.level.tile.Block;
-import com.mojang.minecraft.mob.Sheep;
 import com.mojang.minecraft.mob.ai.BasicAI;
 import com.mojang.util.MathHelper;
 

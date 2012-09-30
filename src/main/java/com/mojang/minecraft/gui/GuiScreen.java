@@ -1,9 +1,7 @@
 package com.mojang.minecraft.gui;
 
 import com.mojang.minecraft.Minecraft;
-import com.mojang.minecraft.gui.Button;
-import com.mojang.minecraft.gui.FontRenderer;
-import com.mojang.minecraft.gui.Screen;
+
 import java.util.ArrayList;
 import java.util.List;
 import org.lwjgl.input.Keyboard;
@@ -40,11 +38,11 @@ public class GuiScreen extends Screen {
             var4.drawImage(var4.x, var4.y, 0, 46 + var9 * 20, var4.width / 2, var4.height);
             var4.drawImage(var4.x + var4.width / 2, var4.y, 200 - var4.width / 2, 46 + var9 * 20, var4.width / 2, var4.height);
             if(!var4.active) {
-               Button.drawCenteredString(var8, var4.text, var4.x + var4.width / 2, var4.y + (var4.height - 8) / 2, -6250336);
+               drawCenteredString(var8, var4.text, var4.x + var4.width / 2, var4.y + (var4.height - 8) / 2, -6250336);
             } else if(var6) {
-               Button.drawCenteredString(var8, var4.text, var4.x + var4.width / 2, var4.y + (var4.height - 8) / 2, 16777120);
+               drawCenteredString(var8, var4.text, var4.x + var4.width / 2, var4.y + (var4.height - 8) / 2, 16777120);
             } else {
-               Button.drawCenteredString(var8, var4.text, var4.x + var4.width / 2, var4.y + (var4.height - 8) / 2, 14737632);
+               drawCenteredString(var8, var4.text, var4.x + var4.width / 2, var4.y + (var4.height - 8) / 2, 14737632);
             }
          }
       }

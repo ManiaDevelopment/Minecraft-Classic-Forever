@@ -1,8 +1,7 @@
 package com.mojang.minecraft.level;
 
 import com.mojang.minecraft.ProgressBarDisplay;
-import com.mojang.minecraft.level.Level;
-import com.mojang.minecraft.level.LevelObjectInputStream;
+
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;

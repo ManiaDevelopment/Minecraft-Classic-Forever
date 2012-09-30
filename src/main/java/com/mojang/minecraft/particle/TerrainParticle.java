@@ -2,7 +2,6 @@ package com.mojang.minecraft.particle;
 
 import com.mojang.minecraft.level.Level;
 import com.mojang.minecraft.level.tile.Block;
-import com.mojang.minecraft.particle.Particle;
 import com.mojang.minecraft.render.ShapeRenderer;
 
 public class TerrainParticle extends Particle {

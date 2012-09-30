@@ -2,7 +2,6 @@ package com.mojang.minecraft.mob;
 
 import com.mojang.minecraft.Entity;
 import com.mojang.minecraft.level.tile.Block;
-import com.mojang.minecraft.mob.Creeper;
 import com.mojang.minecraft.mob.ai.BasicAttackAI;
 import com.mojang.minecraft.particle.TerrainParticle;
 import com.mojang.util.MathHelper;

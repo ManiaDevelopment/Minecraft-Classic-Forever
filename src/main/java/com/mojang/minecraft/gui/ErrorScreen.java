@@ -1,7 +1,5 @@
 package com.mojang.minecraft.gui;
 
-import com.mojang.minecraft.gui.GuiScreen;
-
 public final class ErrorScreen extends GuiScreen {
 
    private String title;

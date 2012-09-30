@@ -8,6 +8,7 @@ import com.mojang.minecraft.render.ShapeRenderer;
 import com.mojang.minecraft.render.TextureManager;
 import com.mojang.util.MathHelper;
 import java.util.List;
+
 import org.lwjgl.opengl.GL11;
 
 public class Arrow extends Entity

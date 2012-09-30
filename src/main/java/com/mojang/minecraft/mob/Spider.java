@@ -1,7 +1,6 @@
 package com.mojang.minecraft.mob;
 
 import com.mojang.minecraft.level.Level;
-import com.mojang.minecraft.mob.QuadrupedMob;
 import com.mojang.minecraft.mob.ai.JumpAttackAI;
 
 public class Spider extends QuadrupedMob {

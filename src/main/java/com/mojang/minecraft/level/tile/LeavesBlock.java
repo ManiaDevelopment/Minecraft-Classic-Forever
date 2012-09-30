@@ -1,8 +1,5 @@
 package com.mojang.minecraft.level.tile;
 
-import com.mojang.minecraft.level.tile.Block;
-import com.mojang.minecraft.level.tile.LeavesBaseBlock;
-
 public final class LeavesBlock extends LeavesBaseBlock {
 
    protected LeavesBlock(int var1, int var2) {

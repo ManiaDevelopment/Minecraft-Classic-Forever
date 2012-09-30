@@ -1,7 +1,6 @@
 package com.mojang.minecraft.particle;
 
 import com.mojang.minecraft.level.Level;
-import com.mojang.minecraft.particle.Particle;
 import com.mojang.minecraft.render.ShapeRenderer;
 
 public class WaterDropParticle extends Particle {

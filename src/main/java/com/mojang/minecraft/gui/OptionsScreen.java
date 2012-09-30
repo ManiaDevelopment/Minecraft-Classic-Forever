@@ -1,10 +1,6 @@
 package com.mojang.minecraft.gui;
 
 import com.mojang.minecraft.GameSettings;
-import com.mojang.minecraft.gui.Button;
-import com.mojang.minecraft.gui.ControlsScreen;
-import com.mojang.minecraft.gui.GuiScreen;
-import com.mojang.minecraft.gui.OptionButton;
 
 public final class OptionsScreen extends GuiScreen {
 

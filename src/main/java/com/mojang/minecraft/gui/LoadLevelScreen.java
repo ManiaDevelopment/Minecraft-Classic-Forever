@@ -1,9 +1,6 @@
 package com.mojang.minecraft.gui;
 
 import com.mojang.minecraft.Minecraft;
-import com.mojang.minecraft.gui.Button;
-import com.mojang.minecraft.gui.GuiScreen;
-import com.mojang.minecraft.gui.LevelDialog;
 import com.mojang.minecraft.level.Level;
 import java.io.BufferedReader;
 import java.io.File;

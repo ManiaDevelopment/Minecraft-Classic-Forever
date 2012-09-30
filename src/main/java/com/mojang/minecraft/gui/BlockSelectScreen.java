@@ -1,7 +1,6 @@
 package com.mojang.minecraft.gui;
 
 import com.mojang.minecraft.SessionData;
-import com.mojang.minecraft.gui.GuiScreen;
 import com.mojang.minecraft.level.tile.Block;
 import com.mojang.minecraft.render.ShapeRenderer;
 import com.mojang.minecraft.render.TextureManager;

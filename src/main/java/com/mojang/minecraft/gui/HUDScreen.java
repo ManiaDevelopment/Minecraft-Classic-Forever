@@ -3,9 +3,6 @@ package com.mojang.minecraft.gui;
 import com.mojang.minecraft.ChatLine;
 import com.mojang.minecraft.Minecraft;
 import com.mojang.minecraft.gamemode.SurvivalGameMode;
-import com.mojang.minecraft.gui.ChatInputScreen;
-import com.mojang.minecraft.gui.FontRenderer;
-import com.mojang.minecraft.gui.Screen;
 import com.mojang.minecraft.level.tile.Block;
 import com.mojang.minecraft.player.Inventory;
 import com.mojang.minecraft.render.ShapeRenderer;
@@ -14,6 +11,7 @@ import com.mojang.util.MathHelper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 

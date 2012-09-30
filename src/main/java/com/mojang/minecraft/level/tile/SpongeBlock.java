@@ -1,7 +1,6 @@
 package com.mojang.minecraft.level.tile;
 
 import com.mojang.minecraft.level.Level;
-import com.mojang.minecraft.level.tile.Block;
 
 public final class SpongeBlock extends Block {
 

@@ -1,7 +1,5 @@
 package com.mojang.minecraft.level.tile;
 
-import com.mojang.minecraft.level.tile.Block;
-
 public final class MetalBlock extends Block {
 
    public MetalBlock(int var1, int var2) {

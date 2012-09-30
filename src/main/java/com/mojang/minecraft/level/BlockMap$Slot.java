@@ -1,8 +1,7 @@
 package com.mojang.minecraft.level;
 
 import com.mojang.minecraft.Entity;
-import com.mojang.minecraft.level.BlockMap;
-import com.mojang.minecraft.level.SyntheticClass;
+
 import java.io.Serializable;
 
 class BlockMap$Slot implements Serializable {

@@ -1,7 +1,5 @@
 package com.mojang.minecraft.model;
 
-import com.mojang.minecraft.model.Model;
-import com.mojang.minecraft.model.ModelPart;
 import com.mojang.util.MathHelper;
 
 public final class CreeperModel extends Model {

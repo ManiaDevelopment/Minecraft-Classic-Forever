@@ -1,7 +1,5 @@
 package com.mojang.minecraft.model;
 
-import com.mojang.minecraft.model.Vec3D;
-
 public final class Vertex {
 
    public Vec3D vector;

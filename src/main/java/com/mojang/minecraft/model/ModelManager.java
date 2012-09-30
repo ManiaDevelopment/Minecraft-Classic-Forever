@@ -1,16 +1,5 @@
 package com.mojang.minecraft.model;
 
-import com.mojang.minecraft.model.AnimalModel;
-import com.mojang.minecraft.model.CreeperModel;
-import com.mojang.minecraft.model.HumanoidModel;
-import com.mojang.minecraft.model.Model;
-import com.mojang.minecraft.model.PigModel;
-import com.mojang.minecraft.model.SheepFurModel;
-import com.mojang.minecraft.model.SheepModel;
-import com.mojang.minecraft.model.SkeletonModel;
-import com.mojang.minecraft.model.SpiderModel;
-import com.mojang.minecraft.model.ZombieModel;
-
 public final class ModelManager {
 
    private HumanoidModel human = new HumanoidModel(0.0F);

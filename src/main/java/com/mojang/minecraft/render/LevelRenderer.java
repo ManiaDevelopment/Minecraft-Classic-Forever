@@ -3,10 +3,7 @@ package com.mojang.minecraft.render;
 import com.mojang.minecraft.Minecraft;
 import com.mojang.minecraft.level.Level;
 import com.mojang.minecraft.player.Player;
-import com.mojang.minecraft.render.Chunk;
-import com.mojang.minecraft.render.ChunkDistanceComparator;
-import com.mojang.minecraft.render.ShapeRenderer;
-import com.mojang.minecraft.render.TextureManager;
+
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;

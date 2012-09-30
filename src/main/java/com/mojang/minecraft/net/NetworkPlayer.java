@@ -3,8 +3,6 @@ package com.mojang.minecraft.net;
 import com.mojang.minecraft.Minecraft;
 import com.mojang.minecraft.gui.FontRenderer;
 import com.mojang.minecraft.mob.HumanoidMob;
-import com.mojang.minecraft.net.PositionUpdate;
-import com.mojang.minecraft.net.SkinDownloadThread;
 import com.mojang.minecraft.render.TextureManager;
 import java.awt.image.BufferedImage;
 import java.util.LinkedList;

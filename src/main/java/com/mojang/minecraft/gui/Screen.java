@@ -1,6 +1,5 @@
 package com.mojang.minecraft.gui;
 
-import com.mojang.minecraft.gui.FontRenderer;
 import com.mojang.minecraft.render.ShapeRenderer;
 import org.lwjgl.opengl.GL11;
 

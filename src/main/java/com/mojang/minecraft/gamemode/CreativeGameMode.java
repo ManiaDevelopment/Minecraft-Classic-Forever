@@ -50,7 +50,7 @@ public class CreativeGameMode extends GameMode
 
 			if(player.inventory.slots[slot] <= 0)
 			{
-				player.inventory.slots[slot] = ((Block)SessionData.allowedBlocks.get(slot)).id;
+				player.inventory.slots[slot] = ((Block) SessionData.allowedBlocks.get(slot)).id;
 			}
 		}
 

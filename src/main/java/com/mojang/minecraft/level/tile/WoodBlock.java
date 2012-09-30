@@ -1,7 +1,5 @@
 package com.mojang.minecraft.level.tile;
 
-import com.mojang.minecraft.level.tile.Block;
-
 public final class WoodBlock extends Block {
 
    protected WoodBlock(int var1) {
@@ -14,7 +12,7 @@ public final class WoodBlock extends Block {
    }
 
    public final int getDrop() {
-      return Block.WOOD.id;
+      return WOOD.id;
    }
 
    protected final int getTextureId(int texture) {

@@ -1,7 +1,5 @@
 package com.mojang.minecraft.model;
 
-import com.mojang.minecraft.model.Vertex;
-
 public final class TexturedQuad {
 
    public Vertex[] vertices;

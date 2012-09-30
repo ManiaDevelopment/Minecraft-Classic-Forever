@@ -2,7 +2,6 @@ package com.mojang.minecraft.mob.ai;
 
 import com.mojang.minecraft.Entity;
 import com.mojang.minecraft.item.Arrow;
-import com.mojang.minecraft.mob.ai.BasicAI;
 import com.mojang.minecraft.model.Vec3D;
 import com.mojang.util.MathHelper;
 

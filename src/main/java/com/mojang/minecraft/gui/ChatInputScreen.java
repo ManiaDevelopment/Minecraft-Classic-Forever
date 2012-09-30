@@ -1,6 +1,5 @@
 package com.mojang.minecraft.gui;
 
-import com.mojang.minecraft.gui.GuiScreen;
 import com.mojang.minecraft.net.NetworkManager;
 import com.mojang.minecraft.net.PacketType;
 import org.lwjgl.input.Keyboard;

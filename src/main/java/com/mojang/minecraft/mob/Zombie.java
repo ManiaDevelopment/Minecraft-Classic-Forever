@@ -1,7 +1,6 @@
 package com.mojang.minecraft.mob;
 
 import com.mojang.minecraft.level.Level;
-import com.mojang.minecraft.mob.HumanoidMob;
 import com.mojang.minecraft.mob.ai.BasicAttackAI;
 
 public class Zombie extends HumanoidMob {

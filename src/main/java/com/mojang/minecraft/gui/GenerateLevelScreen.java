@@ -1,8 +1,5 @@
 package com.mojang.minecraft.gui;
 
-import com.mojang.minecraft.gui.Button;
-import com.mojang.minecraft.gui.GuiScreen;
-
 public final class GenerateLevelScreen extends GuiScreen {
 
    private GuiScreen parent;

@@ -1,12 +1,5 @@
 package com.mojang.minecraft.gui;
 
-import com.mojang.minecraft.gui.Button;
-import com.mojang.minecraft.gui.GenerateLevelScreen;
-import com.mojang.minecraft.gui.GuiScreen;
-import com.mojang.minecraft.gui.LoadLevelScreen;
-import com.mojang.minecraft.gui.OptionsScreen;
-import com.mojang.minecraft.gui.SaveLevelScreen;
-
 public final class PauseScreen extends GuiScreen {
 
    public final void onOpen() {
