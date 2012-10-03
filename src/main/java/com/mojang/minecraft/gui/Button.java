@@ -1,5 +1,7 @@
 package com.mojang.minecraft.gui;
 
+import com.mojang.minecraft.gui.Screen;
+
 public class Button extends Screen {
 
    int width;

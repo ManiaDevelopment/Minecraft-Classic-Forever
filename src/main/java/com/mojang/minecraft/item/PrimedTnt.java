@@ -10,7 +10,6 @@ import com.mojang.minecraft.render.ShapeRenderer;
 import com.mojang.minecraft.render.TextureManager;
 import com.mojang.util.MathHelper;
 import java.util.Random;
-
 import org.lwjgl.opengl.GL11;
 
 public class PrimedTnt extends Entity

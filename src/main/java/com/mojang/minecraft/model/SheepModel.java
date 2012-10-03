@@ -1,5 +1,8 @@
 package com.mojang.minecraft.model;
 
+import com.mojang.minecraft.model.AnimalModel;
+import com.mojang.minecraft.model.ModelPart;
+
 public final class SheepModel extends AnimalModel {
 
    public SheepModel() {

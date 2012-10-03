@@ -1,7 +1,10 @@
 package com.mojang.minecraft.gui;
 
 import com.mojang.minecraft.Minecraft;
-
+import com.mojang.minecraft.gui.Button;
+import com.mojang.minecraft.gui.GuiScreen;
+import com.mojang.minecraft.gui.LevelNameScreen;
+import com.mojang.minecraft.gui.LoadLevelScreen;
 import java.io.File;
 
 public final class SaveLevelScreen extends LoadLevelScreen {

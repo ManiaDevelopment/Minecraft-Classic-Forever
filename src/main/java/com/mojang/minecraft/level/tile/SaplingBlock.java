@@ -1,7 +1,8 @@
 package com.mojang.minecraft.level.tile;
 
 import com.mojang.minecraft.level.Level;
-
+import com.mojang.minecraft.level.tile.Block;
+import com.mojang.minecraft.level.tile.FlowerBlock;
 import java.util.Random;
 
 public final class SaplingBlock extends FlowerBlock {
@@ -14,7 +15,7 @@ public final class SaplingBlock extends FlowerBlock {
 
    public final void update(Level level, int x, int y, int z, Random rand) {
       int var6 = level.getTile(x, y - 1, z);
-      if(level.isLit(x, y, z) && (var6 == DIRT.id || var6 == GRASS.id)) {
+      if(level.isLit(x, y, z) && (var6 == Block.DIRT.id || var6 == Block.GRASS.id)) {
          if(rand.nextInt(5) == 0) {
             level.setTileNoUpdate(x, y, z, 0);
             if(!level.maybeGrowTree(x, y, z)) {

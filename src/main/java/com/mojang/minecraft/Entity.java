@@ -10,7 +10,6 @@ import com.mojang.minecraft.net.PositionUpdate;
 import com.mojang.minecraft.phys.AABB;
 import com.mojang.minecraft.render.TextureManager;
 import com.mojang.util.MathHelper;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 

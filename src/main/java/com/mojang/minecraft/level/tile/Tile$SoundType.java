@@ -1,5 +1,7 @@
 package com.mojang.minecraft.level.tile;
 
+import com.mojang.minecraft.level.tile.Block;
+
 public enum Tile$SoundType {
 
    none("none", 0, "-", 0.0F, 0.0F),

@@ -4,11 +4,13 @@ import com.mojang.minecraft.Entity;
 import com.mojang.minecraft.level.Level;
 import com.mojang.minecraft.mob.Mob;
 import com.mojang.minecraft.model.HumanoidModel;
+import com.mojang.minecraft.player.InputHandler;
+import com.mojang.minecraft.player.Inventory;
+import com.mojang.minecraft.player.Player$1;
 import com.mojang.minecraft.render.TextureManager;
 import com.mojang.util.MathHelper;
 import java.awt.image.BufferedImage;
 import java.util.List;
-
 import org.lwjgl.opengl.GL11;
 
 public class Player extends Mob {

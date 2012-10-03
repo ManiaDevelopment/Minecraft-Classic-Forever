@@ -1,6 +1,7 @@
 package com.mojang.minecraft.render.texture;
 
 import com.mojang.minecraft.level.tile.Block;
+import com.mojang.minecraft.render.texture.TextureFX;
 
 public final class TextureWaterFX extends TextureFX {
 

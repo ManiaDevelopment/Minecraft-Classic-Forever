@@ -1,5 +1,7 @@
 package com.mojang.minecraft;
 
+import com.mojang.minecraft.Minecraft;
+import com.mojang.minecraft.StopGameException;
 import com.mojang.minecraft.render.ShapeRenderer;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;

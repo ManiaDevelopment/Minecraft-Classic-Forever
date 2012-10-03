@@ -2,6 +2,7 @@ package com.mojang.minecraft.particle;
 
 import com.mojang.minecraft.Entity;
 import com.mojang.minecraft.level.Level;
+import com.mojang.minecraft.particle.Particle;
 import com.mojang.minecraft.render.TextureManager;
 import java.util.ArrayList;
 import java.util.List;

@@ -2,6 +2,7 @@ package com.mojang.minecraft.level.tile;
 
 import com.mojang.minecraft.level.Level;
 import com.mojang.minecraft.level.liquid.LiquidType;
+import com.mojang.minecraft.phys.AABB;
 import com.mojang.minecraft.render.ShapeRenderer;
 
 import java.util.Random;
@@ -158,4 +159,10 @@ public class LiquidBlock extends Block {
    public final int getRenderPass() {
       return this.type == LiquidType.WATER?1:0;
    }
+
+	@Override
+	public AABB getCollisionBox(int x, int y, int z)
+	{
+		return null;
+	}
 }

@@ -2,6 +2,7 @@ package com.mojang.minecraft.level;
 
 import com.mojang.minecraft.Entity;
 import com.mojang.minecraft.ProgressBarDisplay;
+import com.mojang.minecraft.level.Level;
 import com.mojang.minecraft.level.liquid.LiquidType;
 import com.mojang.minecraft.mob.Creeper;
 import com.mojang.minecraft.mob.Mob;

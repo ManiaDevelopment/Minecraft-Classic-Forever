@@ -1,6 +1,8 @@
 package com.mojang.minecraft.gui;
 
 import com.mojang.minecraft.Minecraft;
+import com.mojang.minecraft.gui.Button;
+import com.mojang.minecraft.gui.GuiScreen;
 import org.lwjgl.input.Keyboard;
 
 public final class LevelNameScreen extends GuiScreen {

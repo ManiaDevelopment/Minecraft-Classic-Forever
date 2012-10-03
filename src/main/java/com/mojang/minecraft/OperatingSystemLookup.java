@@ -1,5 +1,7 @@
 package com.mojang.minecraft;
 
+import com.mojang.minecraft.Minecraft$OS;
+
 // $FF: synthetic class
 final class OperatingSystemLookup {
 

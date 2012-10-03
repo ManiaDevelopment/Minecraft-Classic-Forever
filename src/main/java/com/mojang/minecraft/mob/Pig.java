@@ -4,6 +4,7 @@ import com.mojang.minecraft.Entity;
 import com.mojang.minecraft.item.Item;
 import com.mojang.minecraft.level.Level;
 import com.mojang.minecraft.level.tile.Block;
+import com.mojang.minecraft.mob.QuadrupedMob;
 
 public class Pig extends QuadrupedMob {
 

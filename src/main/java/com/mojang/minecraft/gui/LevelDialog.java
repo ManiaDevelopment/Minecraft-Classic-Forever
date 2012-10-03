@@ -1,5 +1,6 @@
 package com.mojang.minecraft.gui;
 
+import com.mojang.minecraft.gui.LoadLevelScreen;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 

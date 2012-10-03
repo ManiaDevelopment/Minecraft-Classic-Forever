@@ -3,6 +3,7 @@ package com.mojang.minecraft;
 import com.mojang.minecraft.gamemode.CreativeGameMode;
 import com.mojang.minecraft.gamemode.GameMode;
 import com.mojang.minecraft.gamemode.SurvivalGameMode;
+import com.mojang.minecraft.gui.*;
 import com.mojang.minecraft.item.Arrow;
 import com.mojang.minecraft.item.Item;
 import com.mojang.minecraft.level.Level;
@@ -24,6 +25,8 @@ import com.mojang.minecraft.particle.WaterDropParticle;
 import com.mojang.minecraft.phys.AABB;
 import com.mojang.minecraft.player.InputHandlerImpl;
 import com.mojang.minecraft.player.Player;
+import com.mojang.minecraft.render.*;
+import com.mojang.minecraft.render.Renderer;
 import com.mojang.minecraft.render.texture.TextureFX;
 import com.mojang.minecraft.render.texture.TextureLavaFX;
 import com.mojang.minecraft.render.texture.TextureWaterFX;
@@ -31,8 +34,6 @@ import com.mojang.minecraft.sound.SoundManager;
 import com.mojang.minecraft.sound.SoundPlayer;
 import com.mojang.net.NetworkHandler;
 import com.mojang.util.MathHelper;
-import com.mojang.minecraft.gui.*;
-import com.mojang.minecraft.render.*;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Controllers;
@@ -55,7 +56,7 @@ import java.util.List;
 
 public final class Minecraft implements Runnable {
 
-   public GameMode gamemode = new CreativeGameMode(this);
+   public GameMode gamemode = new SurvivalGameMode(this);
    private boolean fullscreen = false;
    public int width;
    public int height;
@@ -74,7 +75,7 @@ public final class Minecraft implements Runnable {
    public FontRenderer fontRenderer;
    public GuiScreen currentScreen = null;
    public ProgressBarDisplay progressBar = new ProgressBarDisplay(this);
-   public com.mojang.minecraft.render.Renderer renderer = new com.mojang.minecraft.render.Renderer(this);
+   public Renderer renderer = new Renderer(this);
    public LevelIO levelIo;
    public SoundManager sound;
    private ResourceDownloadThread resourceThread;
@@ -92,13 +93,11 @@ public final class Minecraft implements Runnable {
    private MinecraftApplet applet;
    String server;
    int port;
-   public volatile boolean running;
+   volatile boolean running;
    public String debug;
    public boolean hasMouse;
    private int lastClick;
    public boolean raining;
-
-	private File mcDir;
 
 
    public Minecraft(Canvas var1, MinecraftApplet var2, int var3, int var4, boolean var5) {
@@ -190,23 +189,6 @@ public final class Minecraft implements Runnable {
 
    }
 
-	private boolean isSystemShuttingDown()
-	{
-		try {
-			java.lang.reflect.Field running = Class.forName("java.lang.Shutdown").getDeclaredField("RUNNING");
-			java.lang.reflect.Field state = Class.forName("java.lang.Shutdown").getDeclaredField("state");
-
-			running.setAccessible(true);
-			state.setAccessible(true);
-
-			return state.getInt(null) > running.getInt(null);
-		}
-		catch (Exception ex) {
-			ex.printStackTrace();
-			return false;
-		}
-	}
-
    public final void shutdown() {
       try {
          if(this.soundPlayer != null) {
@@ -225,7 +207,7 @@ public final class Minecraft implements Runnable {
       Minecraft var5 = this;
       if(!this.levelLoaded) {
          try {
-            LevelIO.save(var5.level, (OutputStream)(new FileOutputStream(new File(mcDir, "level.dat"))));
+            LevelIO.save(var5.level, (OutputStream)(new FileOutputStream(new File("level.dat"))));
          } catch (Exception var2) {
             var2.printStackTrace();
          }
@@ -233,10 +215,7 @@ public final class Minecraft implements Runnable {
 
       Mouse.destroy();
       Keyboard.destroy();
-	   if(!isSystemShuttingDown())
-	   {
-		   Display.destroy();
-	   }
+      Display.destroy();
    }
 
    public final void run() {
@@ -292,7 +271,7 @@ public final class Minecraft implements Runnable {
          GL11.glLoadIdentity();
          GL11.glMatrixMode(5888);
          checkGLError("Startup");
-         String var3 = "mcraft/client";
+         String var3 = "minecraftclassicforever";
          String var5 = System.getProperty("user.home", ".");
          String var6;
          File var7;
@@ -320,7 +299,7 @@ public final class Minecraft implements Runnable {
             throw new RuntimeException("The working directory could not be created: " + var7);
          }
 
-         mcDir = var7;
+         File var2 = var7;
          this.settings = new GameSettings(this, var7);
          this.textureManager = new TextureManager(this.settings);
          this.textureManager.registerAnimation(new TextureLavaFX());
@@ -344,7 +323,7 @@ public final class Minecraft implements Runnable {
                   var1.loadOnlineLevel(var1.levelName, var1.levelId);
                } else if(!var1.levelLoaded) {
                   Level var11 = null;
-                  if((var11 = var1.levelIo.load((InputStream)(new FileInputStream(new File(mcDir, "level.dat"))))) != null) {
+                  if((var11 = var1.levelIo.load((InputStream)(new FileInputStream(new File("level.dat"))))) != null) {
                      var1.setLevel(var11);
                   }
                }
@@ -385,7 +364,7 @@ public final class Minecraft implements Runnable {
                var4.running = false;
             }
 
-            var1.resourceThread = new ResourceDownloadThread(mcDir, var1);
+            var1.resourceThread = new ResourceDownloadThread(var2, var1);
             var1.resourceThread.start();
          } catch (Exception var52) {
             ;
@@ -464,7 +443,7 @@ public final class Minecraft implements Runnable {
                   if(!this.online) {
                      this.gamemode.applyCracks(this.timer.delta);
                      float var65 = this.timer.delta;
-                     com.mojang.minecraft.render.Renderer var66 = this.renderer;
+                     Renderer var66 = this.renderer;
                      if(this.renderer.displayActive && !Display.isActive()) {
                         var66.minecraft.pause();
                      }
@@ -509,8 +488,8 @@ public final class Minecraft implements Runnable {
                         var70 = var86 - Mouse.getY() * var86 / var66.minecraft.height - 1;
                         if(var66.minecraft.level != null) {
                            float var80 = var65;
-                           com.mojang.minecraft.render.Renderer var82 = var66;
-                           com.mojang.minecraft.render.Renderer var27 = var66;
+                           Renderer var82 = var66;
+                           Renderer var27 = var66;
                            Player var28;
                            float var29 = (var28 = var66.minecraft.player).xRotO + (var28.xRot - var28.xRotO) * var65;
                            float var30 = var28.yRotO + (var28.yRot - var28.yRotO) * var65;
@@ -1668,7 +1647,7 @@ public final class Minecraft implements Runnable {
       }
 
       if(this.level != null) {
-         com.mojang.minecraft.render.Renderer var29 = this.renderer;
+         Renderer var29 = this.renderer;
          ++this.renderer.levelTicks;
          HeldBlock var41 = var29.heldBlock;
          var29.heldBlock.lastPos = var41.pos;
@@ -1703,7 +1682,7 @@ public final class Minecraft implements Runnable {
          }
 
          if(var29.minecraft.raining) {
-            com.mojang.minecraft.render.Renderer var39 = var29;
+            Renderer var39 = var29;
             var27 = var29.minecraft.player;
             Level var32 = var29.minecraft.level;
             var40 = (int)var27.x;

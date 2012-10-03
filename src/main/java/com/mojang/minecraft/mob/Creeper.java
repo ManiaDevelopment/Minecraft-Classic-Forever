@@ -1,6 +1,8 @@
 package com.mojang.minecraft.mob;
 
 import com.mojang.minecraft.level.Level;
+import com.mojang.minecraft.mob.Creeper$1;
+import com.mojang.minecraft.mob.Mob;
 import com.mojang.util.MathHelper;
 
 public class Creeper extends Mob {

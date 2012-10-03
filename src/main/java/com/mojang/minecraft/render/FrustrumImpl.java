@@ -1,5 +1,6 @@
 package com.mojang.minecraft.render;
 
+import com.mojang.minecraft.render.Frustrum;
 import com.mojang.util.MathHelper;
 import java.nio.FloatBuffer;
 import org.lwjgl.BufferUtils;

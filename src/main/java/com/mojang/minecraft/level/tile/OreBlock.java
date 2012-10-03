@@ -1,5 +1,7 @@
 package com.mojang.minecraft.level.tile;
 
+import com.mojang.minecraft.level.tile.Block;
+
 public final class OreBlock extends Block {
 
    public OreBlock(int var1, int var2) {
@@ -7,7 +9,7 @@ public final class OreBlock extends Block {
    }
 
    public final int getDrop() {
-      return this == COAL_ORE ? SLAB.id:(this == GOLD_ORE ? GOLD_BLOCK.id:(this == IRON_ORE ? IRON_BLOCK.id:this.id));
+      return this == Block.COAL_ORE?Block.SLAB.id:(this == Block.GOLD_ORE?Block.GOLD_BLOCK.id:(this == Block.IRON_ORE?Block.IRON_BLOCK.id:this.id));
    }
 
    public final int getDropCount() {

@@ -1,6 +1,7 @@
 package com.mojang.minecraft.level.tile;
 
 import com.mojang.minecraft.level.Level;
+import com.mojang.minecraft.phys.AABB;
 import com.mojang.minecraft.render.ShapeRenderer;
 import com.mojang.util.MathHelper;
 
@@ -19,7 +20,7 @@ public class FlowerBlock extends Block {
    public void update(Level level, int x, int y, int z, Random rand) {
       if(!level.growTrees) {
          int var6 = level.getTile(x, y - 1, z);
-         if(!level.isLit(x, y, z) || var6 != DIRT.id && var6 != GRASS.id) {
+         if(!level.isLit(x, y, z) || var6 != Block.DIRT.id && var6 != Block.GRASS.id) {
             level.setTile(x, y, z, 0);
          }
 
@@ -36,7 +37,7 @@ public class FlowerBlock extends Block {
       float var18 = ((float)var6 + 15.99F) / 256.0F;
 
       for(int var8 = 0; var8 < 2; ++var8) {
-         float var9 = (float)((double) MathHelper.sin((float) var8 * 3.1415927F / 2.0F + 0.7853982F) * 0.5D);
+         float var9 = (float)((double)MathHelper.sin((float)var8 * 3.1415927F / 2.0F + 0.7853982F) * 0.5D);
          float var10 = (float)((double)MathHelper.cos((float)var8 * 3.1415927F / 2.0F + 0.7853982F) * 0.5D);
          float var11 = var2 + 0.5F - var9;
          var9 += var2 + 0.5F;
@@ -85,4 +86,10 @@ public class FlowerBlock extends Block {
       shapeRenderer.color(1.0F, 1.0F, 1.0F);
       this.render(shapeRenderer, (float)-2, 0.0F, 0.0F);
    }
+
+	@Override
+	public AABB getCollisionBox(int x, int y, int z)
+	{
+		return null;
+	}
 }

@@ -1,5 +1,7 @@
 package com.mojang.minecraft.mob.ai;
 
+import com.mojang.minecraft.mob.ai.BasicAttackAI;
+
 public class JumpAttackAI extends BasicAttackAI {
 
    public static final long serialVersionUID = 0L;

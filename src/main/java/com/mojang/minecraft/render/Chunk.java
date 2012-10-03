@@ -3,6 +3,8 @@ package com.mojang.minecraft.render;
 import com.mojang.minecraft.level.Level;
 import com.mojang.minecraft.level.tile.Block;
 import com.mojang.minecraft.player.Player;
+import com.mojang.minecraft.render.Frustrum;
+import com.mojang.minecraft.render.ShapeRenderer;
 import com.mojang.util.MathHelper;
 import org.lwjgl.opengl.GL11;
 
@@ -29,7 +31,7 @@ public final class Chunk {
       this.y = var3;
       this.z = var4;
       this.width = this.height = this.depth = 16;
-      MathHelper.sqrt((float) (this.width * this.width + this.height * this.height + this.depth * this.depth));
+      MathHelper.sqrt((float)(this.width * this.width + this.height * this.height + this.depth * this.depth));
       this.baseListId = var6;
       this.setAllDirty();
    }

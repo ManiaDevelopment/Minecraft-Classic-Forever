@@ -1,6 +1,7 @@
 package com.mojang.minecraft.render.texture;
 
 import com.mojang.minecraft.level.tile.Block;
+import com.mojang.minecraft.render.texture.TextureFX;
 import com.mojang.util.MathHelper;
 
 public final class TextureLavaFX extends TextureFX {
@@ -27,7 +28,7 @@ public final class TextureLavaFX extends TextureFX {
       for(var1 = 0; var1 < 16; ++var1) {
          for(var2 = 0; var2 < 16; ++var2) {
             var3 = 0.0F;
-            int var4 = (int)(MathHelper.sin((float) var2 * 3.1415927F * 2.0F / 16.0F) * 1.2F);
+            int var4 = (int)(MathHelper.sin((float)var2 * 3.1415927F * 2.0F / 16.0F) * 1.2F);
             var5 = (int)(MathHelper.sin((float)var1 * 3.1415927F * 2.0F / 16.0F) * 1.2F);
 
             for(var6 = var1 - 1; var6 <= var1 + 1; ++var6) {
